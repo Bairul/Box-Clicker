@@ -7,7 +7,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.9.0/p5.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.5.11/addons/p5.dom.min.js"></script>
     <script>
-      const DEFAULT_TIME = 9;
+      const DEFAULT_TIME = 30;
       const DEFAULT_SIZE = 5;
       const DEFAULT_BUTTON_HEIGHT = 30;
       var start = 1, pause = 1, options = 0;
@@ -50,8 +50,6 @@
         gamemodes.option('  Mixed ',4);
         gamemodes.selected(1);
         gamemodes.position(-width,-height);
-        
-        boxes.push(new BOX((floor(random(0,DEFAULT_SIZE))+0.5)*height/DEFAULT_SIZE,(floor(random(0,DEFAULT_SIZE))+0.5)*height/DEFAULT_SIZE));
       }
       function draw() {
         game();
@@ -103,8 +101,26 @@
             boxes[i].bx = boxes[i].ix;
             boxes[i].by = boxes[i].iy;
             // classic mode = randomizes red box
-            boxes[i].ix = (floor(random(0, DEFAULT_SIZE)) + 0.5) * height/DEFAULT_SIZE;
-            boxes[i].iy = (floor(random(0, DEFAULT_SIZE)) + 0.5) * height/DEFAULT_SIZE;
+            if (gamemodes.value() == 1) {
+              boxes[i].ix = (floor(random(0, DEFAULT_SIZE)) + 0.5) * height/DEFAULT_SIZE;
+              boxes[i].iy = (floor(random(0, DEFAULT_SIZE)) + 0.5) * height/DEFAULT_SIZE;
+            } else if (gamemodes.value() == 2) {
+              // streamy mode = adjacent red boxes
+              let dx = boxes[i].ix + floor(random(-1,2)) * (height/DEFAULT_SIZE);
+              let dy = boxes[i].iy + floor(random(-1,2)) * (height/DEFAULT_SIZE);
+              while (dx < 0 || dx > height) {
+                dx = boxes[i].ix + floor(random(-1,2)) * (height/DEFAULT_SIZE);
+              }
+              while (dy < 0 || dy > height) {
+                dy = boxes[i].iy + floor(random(-1,2)) * (height/DEFAULT_SIZE);
+              }
+              boxes[i].ix = dx;
+              boxes[i].iy = dy;
+            } else if (gamemodes.value() == 3) {
+              
+            } else {
+              
+            }
             
             combo++;
             score += point * combo;
@@ -263,6 +279,8 @@
         startButton.position(-width,-height);
         restartButton.position(-width,-height);
         menuButton.position(-width,-height);
+        boxes.splice(0,1);
+        boxes.push(new BOX((floor(random(0,DEFAULT_SIZE))+0.5)*height/DEFAULT_SIZE,(floor(random(0,DEFAULT_SIZE))+0.5)*height/DEFAULT_SIZE));
       }
     </script>
 </head>
