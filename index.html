@@ -11,12 +11,17 @@
         const DEFAULT_TIME = 10;
         const GRID_SIZE = 5;
         const BOX_SIZE = HEIGHT / GRID_SIZE;
-        const BUTTON_HEIGHT = 30;
+
         const SCOREBOARD_WIDTH = 100;
         const SCOREBOARD_X = WIDTH - SCOREBOARD_WIDTH / 2;
         const SCOREBOARD_TEXTSIZE = 20;
         const HEALTHBAR_Y = 240;
-        const MAX_DECAY = 235;
+        const HEALTHBAR_SEG_LEN = 100;
+        const HEALTHBAR_SEG_WID = HEALTHBAR_SEG_LEN / 2;
+        const HEALTH_GAIN = HEALTHBAR_SEG_LEN / 3;
+        const MIN_DECAYBAR = HEALTHBAR_Y - 5;
+
+        const BUTTON_HEIGHT = 30;
         
         let startGame = false;
         let firstGame = true;
@@ -28,7 +33,7 @@
         let highScore = 0;
         let combo = 0;
         let maxCombo = 0;
-        let decaySpeed = 0;
+        let decayBar = 0;
         let point = 0; // point earned per successful hit
         // objects
         let currentBox;
@@ -62,38 +67,41 @@
             preBoxes.push(new PRE_BOX(genRandGridVal(), genRandGridVal(), 'red'));
         }
 
-        function drawHealthBar(baseDecay) {
+        function drawHealthBar(basedecayBar) {
             rectMode(CORNER);
+            let gaugeX = WIDTH - SCOREBOARD_WIDTH + (SCOREBOARD_WIDTH - HEALTHBAR_SEG_WID) / 2;
             // draw healthbar gauge
             fill(180);
             for (i = 0; i <= 2; i++) {
-                rect(WIDTH - 75, HEIGHT / 2 - 100, 50, HEALTHBAR_Y - i * 80);
+                rect(gaugeX, HEIGHT / 2 - HEALTHBAR_SEG_LEN, HEALTHBAR_SEG_WID, HEALTHBAR_Y - i * 
+                                                                                (HEALTHBAR_Y / 3));
             }
 
             // point decreases as health drops to encourage maintaining health
-            if (decay <= HEALTHBAR_Y / 3) {
+            if (decayBar <= HEALTHBAR_Y / 3) {
                 fill(50, 100, 255, 120); // blue
                 point = 100;
-            } else if (decay > HEALTHBAR_Y / 3 && decay < HEALTHBAR_Y / 3 * 2) {
+            } else if (decayBar > HEALTHBAR_Y / 3 && decayBar < HEALTHBAR_Y / 3 * 2) {
                 fill(100, 255, 50, 120); // green
                 point = 50;
             } else {
                 fill(255, 0, 0, 120); // red
                 point = 10;
             }
-            // natural decay of health gets faster over time
-            if (decay >= MAX_DECAY) {
-                decay = MAX_DECAY;
+            // natural decayBar of health gets faster over time
+            if (decayBar >= MIN_DECAYBAR) {
+                decayBar = MIN_DECAYBAR;
             } else {
                 if (time < DEFAULT_TIME / 3) {
-                    decay += baseDecay + 1;
+                    decayBar += basedecayBar + 1;
                 } else if (time >= DEFAULT_TIME / 3 && time < DEFAULT_TIME / 3 * 2) {
-                    decay += baseDecay + 0.5;
+                    decayBar += basedecayBar + 0.5;
                 } else {
-                    decay += baseDecay;
+                    decayBar += basedecayBar;
                 }
             }
-            rect(WIDTH - 75, HEIGHT / 2 - 100 + decay, 50, HEALTHBAR_Y - decay);
+            // decay bar
+            rect(gaugeX, HEIGHT / 2 - HEALTHBAR_SEG_LEN + decayBar, HEALTHBAR_SEG_WID, HEALTHBAR_Y - decayBar);
 
             rectMode(CENTER);
         }
@@ -164,7 +172,7 @@
             }
         }
 
-        function drawGrid() {
+        function drawGrid() { // background grid
             strokeWeight(3);
             stroke(100, 100, 100);
             for(i = 1; i <= GRID_SIZE; i++) {
@@ -228,6 +236,7 @@
                 drawBoxes();
                 drawCursor('red');
             } else {
+                cursor();
                 if (firstGame) {
                     startButton.position(WIDTH / 2 - 40, HEIGHT / 2 - BUTTON_HEIGHT / 2);
                 } else {
@@ -243,7 +252,7 @@
             startGame = true;
             firstGame = false;
             time = DEFAULT_TIME;
-            decay = 0;
+            decayBar = 0;
             combo = 0;
             maxCombo = 0;
             score = 0;
@@ -251,25 +260,59 @@
             // get buttons out of sight
             startButton.position(-width,-height);
             restartButton.position(-width,-height);
-
-            currentBox.setPos(genRandGridVal(), genRandGridVal());
-            for (i = 0; i < preBoxes.length; i++) {
-                preBoxes[i].setPos(genRandGridVal(), genRandGridVal());
-            }
+            randAllBoxes();
         }
 
         function keyPressed() {
             if (!startGame) {
                 return;
             }
+            gameplay();
+        }
+
+        function mousePressed() {
+            if (!startGame) {
+                return;
+            }
+            gameplay();
+        }
+
+        function gameplay() {
             if (isOnMouse(currentBox.x, currentBox.y)) {
-                
+                // sets current to the first pre-box
+                currentBox.setPos(preBoxes[0].x, preBoxes[0].y);
+                // sets the previous pre-box to the next one
+                for (i = 1; i < preBoxes.length; i++) {
+                    preBoxes[i - 1].setPos(preBoxes[i].x, preBoxes[i].y);
+                }
+                // sets last pre-box to another location
+                preBoxes[preBoxes.length - 1].setPos(genRandGridVal(), genRandGridVal());
+
+                // combo and points
+                combo++;
+                score += point * combo; // point system
+                if (decayBar > HEALTH_GAIN) {
+                    decayBar -= HEALTH_GAIN;
+                } else { // avoid overfill
+                    decayBar -= decayBar;
+                }
+            } else {
+                // broken combo
+                combo = 0;
+                decayBar += 20;
             }
         }
 
         function isOnMouse(x, y) {
             return mouseX < x + BOX_SIZE / 2 && mouseX > x - BOX_SIZE / 2
                 && mouseY < y + BOX_SIZE / 2 && mouseY > y - BOX_SIZE / 2;
+        }
+
+        function randAllBoxes() {
+            currentBox.setPos(genRandGridVal(), genRandGridVal());
+            for (i = 0; i < preBoxes.length; i++) {
+                preBoxes[i].setPos(genRandGridVal(), genRandGridVal());
+            }
         }
 
         function genRandGridVal() {
