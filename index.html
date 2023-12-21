@@ -312,13 +312,10 @@
                     preBoxes[i - 1].setPos(preBoxes[i].x, preBoxes[i].y);
                 }
 
-                console.log(gamemodes.value());
                 // sets last pre-box to another location depending on gamemode
                 if (gamemodes.value() == 1) {
-                    console.log("classy");
                     preBoxes[preBoxes.length - 1].setPos(genRandGridVal(), genRandGridVal());
                 } else if (gamemodes.value() == 2) {
-                    console.log("streamy");
                     streamy();
                 } else if (gamemodes.value() == 3) {
                     jumpy();
@@ -352,13 +349,23 @@
             }
             while (newY > HEIGHT || newY < 0) {
                 randY = floor(random(0, 3)) - 1;
-                newY = preBoxes[preBoxes.length - 1].x + randY * BOX_SIZE;
+                newY = preBoxes[preBoxes.length - 1].y + randY * BOX_SIZE;
             }
             preBoxes[preBoxes.length - 1].setPos(newX, newY);
         }
 
         function jumpy() {
+            let newX = genRandGridVal();
+            let newY = genRandGridVal();
 
+            while (abs(preBoxes[preBoxes.length - 1].x - newX) < BOX_SIZE) {
+                newX = genRandGridVal();
+            }
+            while (abs(preBoxes[preBoxes.length - 1].y - newY) < BOX_SIZE) {
+                newY = genRandGridVal();
+            }
+
+            preBoxes[preBoxes.length - 1].setPos(newX, newY);
         }
 
         function isOnMouse(x, y) {
