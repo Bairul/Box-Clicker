@@ -1,292 +1,284 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
-
 <head>
-<meta name="description" content="[Box Clicker]">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
     <title>Box Clicker</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.9.0/p5.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/p5.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.5.11/addons/p5.dom.min.js"></script>
     <script>
-      const DEFAULT_TIME = 30;
-      const DEFAULT_SIZE = 5;
-      const DEFAULT_BUTTON_HEIGHT = 30;
-      var start = 1, pause = 1, options = 0;
-      var boxes = [];
-      var score = 0, combo = 0, point = 0;
-      var highScore = 0, maxCombo = 0;
-      var time = DEFAULT_TIME;
-      var decay = 0;
-      // buttons
-      let startButton, restartButton, menuButton, backButton, gamemodes;
-      function setup() {
-        createCanvas(600,500);
-        rectMode(CENTER);
-        textAlign(CENTER);
-        //buttons
-        startButton = createButton("Start");
-        restartButton = createButton("Restart");
-        menuButton = createButton("Menu");
-        backButton = createButton("Back");
-        gamemodes = createRadio();
+        const HEIGHT = 500;
+        const WIDTH = 600;
+        const DEFAULT_TIME = 10;
+        const GRID_SIZE = 5;
+        const BOX_SIZE = HEIGHT / GRID_SIZE;
+        const BUTTON_HEIGHT = 30;
+        const SCOREBOARD_WIDTH = 100;
+        const SCOREBOARD_X = WIDTH - SCOREBOARD_WIDTH / 2;
+        const SCOREBOARD_TEXTSIZE = 20;
+        const HEALTHBAR_Y = 240;
+        const MAX_DECAY = 235;
         
-        startButton.size(80,DEFAULT_BUTTON_HEIGHT);
-        restartButton.size(90,DEFAULT_BUTTON_HEIGHT);
-        menuButton.size(60,DEFAULT_BUTTON_HEIGHT);
-        backButton.size(60,DEFAULT_BUTTON_HEIGHT);
+        let startGame = false;
+        let firstGame = true;
+        let i;
+
+        // gameplay variables
+        let time = DEFAULT_TIME;
+        let score = 0;
+        let highScore = 0;
+        let combo = 0;
+        let maxCombo = 0;
+        let decaySpeed = 0;
+        let point = 0; // point earned per successful hit
+        // objects
+        let currentBox;
+        let preBoxes = [];
+
+        // buttons
+        let startButton;
+        let restartButton;
         
-        restartButton.position(-width,-height);
-        menuButton.position(8,8);
-        backButton.position(-width,-height);
-        
-        restartButton.mouseClicked(startGame);
-        startButton.mouseClicked(startGame);
-        menuButton.mouseClicked(menuChoose);
-        backButton.mouseClicked(backGame);
-        
-        // gamemodes
-        gamemodes.option('  Classic ',1);
-        gamemodes.option('  Streamy ',2);
-        gamemodes.option('  Jumpy ',3);
-        gamemodes.option('  Mixed ',4);
-        gamemodes.selected(1);
-        gamemodes.position(-width,-height);
-      }
-      function draw() {
-        game();
-      }
-      function healthBar(d) {
-        var y = 240;
-        rectMode(CORNER);
-        fill(180);
-        for (var i = 0; i <= 2; i++) {
-          rect(width-75,height/2-100,50,y-i*80);
+        function setup() {
+            createCanvas(WIDTH, HEIGHT);
+            rectMode(CENTER);
+            textAlign(CENTER);
+
+            // buttons
+            startButton = createButton("Start");
+            restartButton = createButton("Restart");
+
+            // set button size and position
+            startButton.size(80, BUTTON_HEIGHT);
+            restartButton.size(90, BUTTON_HEIGHT);
+
+            restartButton.position(-WIDTH, -HEIGHT);
+
+            // button functions
+            restartButton.mouseClicked(initGame);
+            startButton.mouseClicked(initGame);
+
+            // objects
+            currentBox = new BOX(genRandGridVal(), genRandGridVal(), 'black');
+            preBoxes.push(new PRE_BOX(genRandGridVal(), genRandGridVal(), 'red'));
         }
-        // point decreases as health drops to encourage high health
-        if (decay <= y/3) {
-          fill(50,100,255,120);
-          point = 100;
-        } else if (decay > y/3 && decay < y*2/3) {
-          fill(100,255,50,120);
-          point = 50;
-        } else {
-          fill(255,0,0,120);
-          point = 10;
-        }
-        // natural decay of health decreases faster over time
-        if (decay >= 235) {
-          decay = 235;
-        } else {
-          if (time < DEFAULT_TIME/3) {
-            decay+=d+1;
-          } else if (time >= DEFAULT_TIME/3 && time < DEFAULT_TIME/3*2) {
-            decay+=d+0.5;
-          } else {
-            decay+=d;
-          }
-        }
-        rect(width-75,height/2-100+decay,50,y-decay);
-        rectMode(CENTER);
-      }
-      function mousePressed() {
-        
-      }
-      function keyPressed() {
-        if (pause == 1) {
-          return;
-        }
-        for (var i = 0; i < boxes.length; i++) {
-          // determines if mouse is within a black box
-          if (mouseX < boxes[i].bx + boxes[i].s/2 && mouseX > boxes[i].bx - boxes[i].s/2 && mouseY < boxes[i].by + boxes[i].s/2 && mouseY > boxes[i].by - boxes[i].s/2) {
-            // sets black box to red box
-            boxes[i].bx = boxes[i].ix;
-            boxes[i].by = boxes[i].iy;
-            // classic mode = randomizes red box
-            if (gamemodes.value() == 1) {
-              boxes[i].ix = (floor(random(0, DEFAULT_SIZE)) + 0.5) * height/DEFAULT_SIZE;
-              boxes[i].iy = (floor(random(0, DEFAULT_SIZE)) + 0.5) * height/DEFAULT_SIZE;
-            } else if (gamemodes.value() == 2) {
-              // streamy mode = adjacent red boxes
-              let dx = boxes[i].ix + floor(random(-1,2)) * (height/DEFAULT_SIZE);
-              let dy = boxes[i].iy + floor(random(-1,2)) * (height/DEFAULT_SIZE);
-              while (dx < 0 || dx > height) {
-                dx = boxes[i].ix + floor(random(-1,2)) * (height/DEFAULT_SIZE);
-              }
-              while (dy < 0 || dy > height) {
-                dy = boxes[i].iy + floor(random(-1,2)) * (height/DEFAULT_SIZE);
-              }
-              boxes[i].ix = dx;
-              boxes[i].iy = dy;
-            } else if (gamemodes.value() == 3) {
-              
-            } else {
-              
+
+        function drawHealthBar(baseDecay) {
+            rectMode(CORNER);
+            // draw healthbar gauge
+            fill(180);
+            for (i = 0; i <= 2; i++) {
+                rect(WIDTH - 75, HEIGHT / 2 - 100, 50, HEALTHBAR_Y - i * 80);
             }
+
+            // point decreases as health drops to encourage maintaining health
+            if (decay <= HEALTHBAR_Y / 3) {
+                fill(50, 100, 255, 120); // blue
+                point = 100;
+            } else if (decay > HEALTHBAR_Y / 3 && decay < HEALTHBAR_Y / 3 * 2) {
+                fill(100, 255, 50, 120); // green
+                point = 50;
+            } else {
+                fill(255, 0, 0, 120); // red
+                point = 10;
+            }
+            // natural decay of health gets faster over time
+            if (decay >= MAX_DECAY) {
+                decay = MAX_DECAY;
+            } else {
+                if (time < DEFAULT_TIME / 3) {
+                    decay += baseDecay + 1;
+                } else if (time >= DEFAULT_TIME / 3 && time < DEFAULT_TIME / 3 * 2) {
+                    decay += baseDecay + 0.5;
+                } else {
+                    decay += baseDecay;
+                }
+            }
+            rect(WIDTH - 75, HEIGHT / 2 - 100 + decay, 50, HEALTHBAR_Y - decay);
+
+            rectMode(CENTER);
+        }
+
+        function drawBoxes() {
+            currentBox.display();
+            for (i = 0; i < preBoxes.length; i++) {
+                preBoxes[i].display();
+            }
+        }
+
+        function drawScoreBoard() {
+            if (score > highScore) {
+                highScore = score;
+            }
+            if (combo > maxCombo) {
+                maxCombo = combo;
+            }
+
+            // scoreboard gui 
+            stroke(100, 100, 100);
+            fill('white');
+            rect(SCOREBOARD_X, HEIGHT / 2, 100, HEIGHT);
+            textSize(SCOREBOARD_TEXTSIZE);
+            stroke('black');
+            strokeWeight(1);
+            fill('black');
+            text("Highscore:", SCOREBOARD_X, SCOREBOARD_TEXTSIZE);
+            text(highScore, SCOREBOARD_X, SCOREBOARD_TEXTSIZE * 2);
+            text("Score:", SCOREBOARD_X, SCOREBOARD_TEXTSIZE * 3);
+            text(score, SCOREBOARD_X, SCOREBOARD_TEXTSIZE * 4);
+            text("Time:", SCOREBOARD_X, SCOREBOARD_TEXTSIZE * 5);
             
-            combo++;
-            score += point * combo;
-            if (decay > 33) {
-              decay -= 33;
-            } else {
-              decay -= decay;
+            text("Combo:", SCOREBOARD_X, HEIGHT - SCOREBOARD_TEXTSIZE * 2);
+            text(maxCombo, SCOREBOARD_X, HEIGHT - SCOREBOARD_TEXTSIZE * 3);
+            text("Max:", SCOREBOARD_X, HEIGHT - SCOREBOARD_TEXTSIZE * 4);
+
+            drawTimer();
+            drawCombo();
+        }
+
+        function drawTimer() {
+            if (time == 0) {
+                startGame = false;
+            } else if (frameCount % 60 == 0) {
+                time--;
             }
-          } else {
+            // changes color of countdown timer to red when less than 5 sec
+            if (time > 5) {
+                text(time, SCOREBOARD_X, SCOREBOARD_TEXTSIZE * 6);
+            } else {
+                fill('red');
+                textSize(SCOREBOARD_TEXTSIZE * 2);
+                text(time, SCOREBOARD_X, SCOREBOARD_TEXTSIZE * 7);
+            }
+        }
+
+        function drawCombo() {
+            // changes color of combo to red when broken combo
+            if (combo == 0 && score > 0) {
+                fill('red');
+                textSize(SCOREBOARD_TEXTSIZE * 2);
+                text(combo, SCOREBOARD_X, HEIGHT - SCOREBOARD_TEXTSIZE / 3);
+            } else {
+                fill('black');
+                textSize(SCOREBOARD_TEXTSIZE);
+                text(combo, SCOREBOARD_X, HEIGHT - SCOREBOARD_TEXTSIZE);
+            }
+        }
+
+        function drawGrid() {
+            strokeWeight(3);
+            stroke(100, 100, 100);
+            for(i = 1; i <= GRID_SIZE; i++) {
+                line(HEIGHT * i / GRID_SIZE, 0, HEIGHT * i / GRID_SIZE, HEIGHT);
+                line(0, HEIGHT * i / GRID_SIZE, HEIGHT, HEIGHT * i / GRID_SIZE);
+            }
+        }
+
+        function drawCursor(color) {
+            noCursor();
+            stroke(color);
+            strokeWeight(5);
+            line(mouseX, mouseY, pmouseX, pmouseY);
+        }
+
+        // objects
+
+        function BOX(initX, initY, color) {
+            this.x = initX;
+            this.y = initY;
+            this.c = color;
+
+            this.display = function() {
+                fill(this.c);
+                noStroke();
+                rect(this.x, this.y, BOX_SIZE, BOX_SIZE);
+            }
+
+            this.setPos = function(newX, newY) {
+                this.x = newX;
+                this.y = newY;
+            }
+        }
+
+        function PRE_BOX(initX, initY, color) {
+            this.x = initX;
+            this.y = initY;
+            this.c = color;
+
+            this.display = function() {
+                noFill();
+                stroke(this.c);
+                strokeWeight(4);
+                rect(this.x, this.y, BOX_SIZE, BOX_SIZE);
+            }
+
+            this.setPos = function(newX, newY) {
+                this.x = newX;
+                this.y = newY;
+            }
+        }
+
+        // gameloop
+        function draw() {
+            background(175, 200, 255);
+
+            if (startGame) {
+                drawGrid();
+                drawScoreBoard();
+                drawHealthBar(1);
+                drawBoxes();
+                drawCursor('red');
+            } else {
+                if (firstGame) {
+                    startButton.position(WIDTH / 2 - 40, HEIGHT / 2 - BUTTON_HEIGHT / 2);
+                } else {
+                    drawScoreBoard();
+                    drawHealthBar(-1);
+                    restartButton.position(WIDTH / 2 - 90, HEIGHT / 2 - BUTTON_HEIGHT / 2);
+                }
+            }
+        }
+
+        // when start or restart button is clicked
+        function initGame() {
+            startGame = true;
+            firstGame = false;
+            time = DEFAULT_TIME;
+            decay = 0;
             combo = 0;
-            decay += 20;
-          }
+            maxCombo = 0;
+            score = 0;
+
+            // get buttons out of sight
+            startButton.position(-width,-height);
+            restartButton.position(-width,-height);
+
+            currentBox.setPos(genRandGridVal(), genRandGridVal());
+            for (i = 0; i < preBoxes.length; i++) {
+                preBoxes[i].setPos(genRandGridVal(), genRandGridVal());
+            }
         }
-      }
-      function game() {
-        background(175,200,255);
-        if (options == 1) {
-          
-        } else if (start == 1 || pause == 1) { // show buttons when game is over
-          cursor();
-          if (start == 0) {
-            // next game and so on
-            scoreBoard();
-            healthBar(-1);
-            menuButton.position(8,8);
-            restartButton.position(width/2-90, height/2-DEFAULT_BUTTON_HEIGHT/2);
-          } else {
-            // initial start
-            startButton.position(width/2-40, height/2-DEFAULT_BUTTON_HEIGHT/2);
-          }
-        } else { // ---===:GAME START:===---
-          
-          // draws the grid of gray lines
-          strokeWeight(3);
-          stroke(100,100,100);
-          for(var i = 1; i <= DEFAULT_SIZE; i++) {
-            line(height*i/DEFAULT_SIZE, 0, height*i/DEFAULT_SIZE, height);
-            line(0, height*i/DEFAULT_SIZE, height, height*i/DEFAULT_SIZE);
-          }
-          
-          scoreBoard();
-          healthBar(1);
-          
-          boxes[0].display('red');
-          boxes[0].display1('black');
-          
-          noCursor();
-          stroke('red');
-          strokeWeight(5);
-          line(mouseX,mouseY,pmouseX,pmouseY);
+
+        function keyPressed() {
+            if (!startGame) {
+                return;
+            }
+            if (isOnMouse(currentBox.x, currentBox.y)) {
+                
+            }
         }
-      }
-      function scoreBoard() {
-        var x = width-50;
-        
-        // tracking highscore and max combo
-        if (score > highScore) {
-          highScore = score;
+
+        function isOnMouse(x, y) {
+            return mouseX < x + BOX_SIZE / 2 && mouseX > x - BOX_SIZE / 2
+                && mouseY < y + BOX_SIZE / 2 && mouseY > y - BOX_SIZE / 2;
         }
-        if (combo > maxCombo) {
-          maxCombo = combo;
+
+        function genRandGridVal() {
+            return (floor(random(0, GRID_SIZE)) + 0.5) * BOX_SIZE;
         }
-        // right side gui 
-        stroke(100,100,100);
-        fill('white');
-        rect(x,height/2,100,height);
-        textSize(20);
-        stroke('black');
-        strokeWeight(1);
-        fill('black');
-        text("Highscore:",x,20);
-        text(highScore,x,40);
-        text("Score:",x,60);
-        text(score,x,80);
-        text("Time:",x,100);
-        text("Combo:",x,height-40);
-        text("Maxcombo:",x,height-80);
-        text(maxCombo,x,height-60);
-        
-        // countdown timer
-        if (time == 0) {
-          pause = 1;
-        } else {
-          if (frameCount%60 == 0) {
-            time--;
-          }
-        }
-        // changes color of countdown timer to red when less than 3 sec
-        if (time > 3) {
-          text(time,x,120);
-        } else {
-          fill('red');
-          textSize(30);
-          text(time,x,130);
-        }
-        // changes color of combo to red when broken combo
-        if (combo == 0 && score > 0) {
-          fill('red');
-          textSize(30);
-          text(combo,x,height-10);
-        } else {
-          fill('black');
-          textSize(20);
-          text(combo,x,height-20);
-        }
-      }
-      function BOX(x,y) {
-        this.s = height/DEFAULT_SIZE;
-        this.ix = (floor(random(0, DEFAULT_SIZE)) + 0.5) * this.s;
-        this.iy = (floor(random(0, DEFAULT_SIZE)) + 0.5) * this.s;
-        this.bx = x;
-        this.by = y;
-        
-        // highlight
-        this.display = function(c) {
-          noFill();
-          stroke(c);
-          strokeWeight(4);
-          rect(this.ix, this.iy, this.s, this.s);
-        }
-        
-        // black box
-        this.display1 = function(c) {
-          fill(c);
-          noStroke();
-          rect(this.bx, this.by, this.s, this.s);
-        }
-      }
-      
-      // when menu button is clicked
-      function menuChoose() {
-        options = 1;
-        startButton.position(-width,-height);
-        restartButton.position(-width,-height);
-        menuButton.position(-width,-height);
-        backButton.position(8,8);
-        gamemodes.position(150,100);
-      }
-      // when back button is clicked
-      function backGame() {
-        options = 0;
-        backButton.position(-width,-height);
-        menuButton.position(8,8);
-        gamemodes.position(-width,-height);
-        
-      }
-      // when start or restart is clicked
-      function startGame() {
-        decay = 0;
-        combo = 0;
-        maxCombo = 0;
-        score = 0;
-        time = DEFAULT_TIME;
-        start = 0;
-        pause = 0;
-        startButton.position(-width,-height);
-        restartButton.position(-width,-height);
-        menuButton.position(-width,-height);
-        boxes.splice(0,1);
-        boxes.push(new BOX((floor(random(0,DEFAULT_SIZE))+0.5)*height/DEFAULT_SIZE,(floor(random(0,DEFAULT_SIZE))+0.5)*height/DEFAULT_SIZE));
-      }
+    
     </script>
 </head>
-
 <body>
 
 </body>
-
 </html>
