@@ -20,6 +20,7 @@
         const HEALTHBAR_SEG_WID = HEALTHBAR_SEG_LEN / 2;
         const HEALTH_GAIN = HEALTHBAR_SEG_LEN / 3;
         const MIN_DECAYBAR = HEALTHBAR_Y - 5;
+        const MIXED_INTERVAL = 90;
 
         const BUTTON_HEIGHT = 30;
         const CURSOR_COLOR = 'red';
@@ -36,6 +37,7 @@
         let maxCombo = 0;
         let decayBar = 0;
         let point = 0; // point earned per successful hit
+        let mixedRandMode = 1;
         // objects
         let currentBox;
         let preBoxes = [];
@@ -181,6 +183,11 @@
             } else if (frameCount % 60 == 0) {
                 time--;
             }
+
+            // for mixed gamemode
+            if (gamemodes.value() == 4 && frameCount % MIXED_INTERVAL == 0) {
+                mixedRandMode = floor(random(1, 4));
+            }
             // changes color of countdown timer to red when less than 5 sec
             if (time > 5) {
                 text(time, SCOREBOARD_X, SCOREBOARD_TEXTSIZE * 6);
@@ -313,14 +320,12 @@
                 }
 
                 // sets last pre-box to another location depending on gamemode
-                if (gamemodes.value() == 1) {
+                if (gamemodes.value() == 1 || (gamemodes.value() == 4 && mixedRandMode == 1)) {
                     preBoxes[preBoxes.length - 1].setPos(genRandGridVal(), genRandGridVal());
-                } else if (gamemodes.value() == 2) {
+                } else if (gamemodes.value() == 2 || (gamemodes.value() == 4 && mixedRandMode == 2)) {
                     streamy();
-                } else if (gamemodes.value() == 3) {
+                } else if (gamemodes.value() == 3 || (gamemodes.value() == 4 && mixedRandMode == 3)) {
                     jumpy();
-                } else {
-
                 }
 
                 // combo and points
