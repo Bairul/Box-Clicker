@@ -28,6 +28,7 @@
         const CURSOR_COLOR = 'red';
         const SLIDER_LENGTH = 100;
         const COLOR_PICK_SIZE = 25;
+        const DEFAULT_WEIGHT = 4;
         
         let canvasPaddingX = 0;
         let canvasPaddingY = 0;
@@ -64,6 +65,7 @@
         // sliders
         let gridSizeSlider;
         let preBoxSlider;
+        let preBoxWeightSlider;
         let timeSlider;
         // checkboxes
         let showLinesCheck;
@@ -90,6 +92,7 @@
             showTransCheck = createCheckbox();
             gridSizeSlider = createSlider(4, 8, gridSize, 1);
             preBoxSlider = createSlider(0, preBoxColors.length, 1, 1);
+            preBoxWeightSlider = createSlider(4, 12, DEFAULT_WEIGHT, 2);
             timeSlider = createSlider(10, DEFAULT_TIME * 2, DEFAULT_TIME, 5);
 
             // set button size and position
@@ -99,6 +102,7 @@
             backButton.size(60, BUTTON_HEIGHT);
             gridSizeSlider.size(SLIDER_LENGTH);
             preBoxSlider.size(SLIDER_LENGTH);
+            preBoxWeightSlider.size(SLIDER_LENGTH);
             timeSlider.size(SLIDER_LENGTH);
 
             menuButton.position(canvasPaddingX, canvasPaddingY);
@@ -130,6 +134,8 @@
 
             // hide positions
             hideMenuGui();
+            // attribute('disabled', '');
+            // removeAttribute('disabled');
         }
 
         function drawHealthBar(basedecayBar) {
@@ -174,7 +180,7 @@
         function drawBoxes() {
             currentBox.display();
             for (i = preBoxes.length - 1; i >= 0; i--) {
-                preBoxes[i].display(8, 255 / (showTransCheck.checked() ? (i + 1) : 1));
+                preBoxes[i].display(preBoxWeightSlider.value(), 255 / (showTransCheck.checked() ? (i + 1) : 1));
             }
         }
 
@@ -281,25 +287,24 @@
             gridSizeSlider.position(vomMenuX, canvasPaddingY + 150);
             timeSlider.position(    vomMenuX, canvasPaddingY + 150 + vertPadSlid);
             preBoxSlider.position(vomMenuX + SLIDER_LENGTH * 2, canvasPaddingY + 150);
-            showLinesCheck.position(vomMenuX + SLIDER_LENGTH * 2 + 75, canvasPaddingY + 200);
+            showLinesCheck.position(vomMenuX + SLIDER_LENGTH * 2 + 75, canvasPaddingY + 199);
             showTransCheck.position(vomMenuX + SLIDER_LENGTH * 2 + 75, canvasPaddingY + 227);
+            preBoxWeightSlider.position(vomMenuX + SLIDER_LENGTH * 2, canvasPaddingY + 345);
 
             textAlign(LEFT);
             textSize(SCOREBOARD_TEXTSIZE / 1.5);
             fill('black');
             strokeWeight(0.25);
-            text("Size:", MENU_X, MENU_Y);
-            text("Time:", MENU_X, MENU_Y + vertPadSlid);
-            text("Premove:", vomSlidX, MENU_Y);
-            text(gridSizeSlider.value(), MENU_X + 35, MENU_Y);
-            text(timeSlider.value(),     MENU_X + 35, MENU_Y + vertPadSlid);
-            text(preBoxSlider.value(),   MENU_X + 60 + SLIDER_LENGTH * 2, MENU_Y);
+            text("Size: " + gridSizeSlider.value(), MENU_X, MENU_Y);
+            text("Time: " + timeSlider.value(),     MENU_X, MENU_Y + vertPadSlid);
+            text("Premove: " + preBoxSlider.value(), vomSlidX, MENU_Y);
             text("Show Lines:",     vomSlidX, MENU_Y + vertPad);
             text("Transparent:",    vomSlidX, MENU_Y + vertPad * 2);
             text("Cursor:",         vomSlidX, MENU_Y + vertPad * 3);
             text("Premove Colors:", vomSlidX, MENU_Y + vertPad * 4);
+            text("Weight: " + preBoxWeightSlider.value(), vomSlidX, MENU_Y + vertPad * 7);
             // colors
-            cursorColorPick.position(vomMenuX + SLIDER_LENGTH * 2 + 68, canvasPaddingY + 225 + vertPad);
+            cursorColorPick.position(vomMenuX + SLIDER_LENGTH * 2 + 68, canvasPaddingY + 224 + vertPad);
             for (i = 0; i < preBoxColorPicks.length; i++) {
                 preBoxColorPicks[i].position(vomMenuX + SLIDER_LENGTH * 2 + i * 30, canvasPaddingY + 280 + vertPad);
                 text(i + 1, vomSlidX + 8 + i * 30, MENU_Y + vertPad * 5)
@@ -541,6 +546,7 @@
             backButton.position(-WIDTH, -HEIGHT);
             gridSizeSlider.position(-WIDTH, -HEIGHT);
             preBoxSlider.position(-WIDTH, -HEIGHT);
+            preBoxWeightSlider.position(-WIDTH, -HEIGHT);
             timeSlider.position(-WIDTH, -HEIGHT);
             gamemodesRadio.position(-WIDTH, -HEIGHT);
             showLinesCheck.position(-WIDTH, -HEIGHT);
