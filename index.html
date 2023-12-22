@@ -9,7 +9,7 @@
         const HEIGHT = 500;
         const WIDTH = 600;
         const MIN_PADDING = 8;
-        const DEFAULT_TIME = 9;
+        const DEFAULT_TIME = 30;
         const DEFAULT_GRID_SIZE = 5;
 
         const SCOREBOARD_WIDTH = 100;
@@ -22,7 +22,8 @@
         const MIN_DECAYBAR = HEALTHBAR_Y - 5;
         const MIXED_INTERVAL = 90;
 
-        const RADIO_X = 150;
+        const MENU_X = 150;
+        const MENU_Y = 185;
         const BUTTON_HEIGHT = 30;
         const CURSOR_COLOR = 'red';
         const SLIDER_LENGTH = 100;
@@ -37,6 +38,7 @@
         // gameplay variables
         let boxSize = HEIGHT / DEFAULT_GRID_SIZE;
         let gridSize = DEFAULT_GRID_SIZE;
+        let maxTime = DEFAULT_TIME;
         let time = DEFAULT_TIME;
         let score = 0;
         let highScore = 0;
@@ -45,6 +47,7 @@
         let decayBar = 0;
         let point = 0; // point earned per successful hit
         let mixedRandMode = 1;
+        let preBoxesColorCycle = 0;
         // objects
         let currentBox;
         let preBoxes = [];
@@ -61,8 +64,10 @@
         // sliders
         let gridSizeSlider;
         let preBoxSlider;
+        let timeSlider;
         // checkboxes
         let showLinesCheck;
+        let showTransCheck;
         // colors
         let cursorColorPick;
         let preBoxColorPicks = [];
@@ -82,8 +87,10 @@
             backButton = createButton("Back");
             gamemodesRadio = createRadio();
             showLinesCheck = createCheckbox();
+            showTransCheck = createCheckbox();
             gridSizeSlider = createSlider(4, 8, gridSize, 1);
             preBoxSlider = createSlider(0, preBoxColors.length, 1, 1);
+            timeSlider = createSlider(10, DEFAULT_TIME * 2, DEFAULT_TIME, 5);
 
             // set button size and position
             startButton.size(80, BUTTON_HEIGHT);
@@ -92,12 +99,9 @@
             backButton.size(60, BUTTON_HEIGHT);
             gridSizeSlider.size(SLIDER_LENGTH);
             preBoxSlider.size(SLIDER_LENGTH);
+            timeSlider.size(SLIDER_LENGTH);
 
-            restartButton.position(-WIDTH, -HEIGHT);
             menuButton.position(canvasPaddingX, canvasPaddingY);
-            backButton.position(-WIDTH, -HEIGHT);
-            gridSizeSlider.position(-WIDTH, -HEIGHT);
-            preBoxSlider.position(-WIDTH, -HEIGHT);
 
             // button functions
             restartButton.mouseClicked(initGame);
@@ -111,10 +115,6 @@
             gamemodesRadio.option('  Jumpy ', 3);
             gamemodesRadio.option('  Mixed ', 4);
             gamemodesRadio.selected(1);
-            gamemodesRadio.position(-WIDTH, -HEIGHT);
-
-            // checkboxes
-            showLinesCheck.position(-WIDTH, -HEIGHT);
 
             // objects
             currentBox = new BOX(0, 0, 'black');
@@ -122,12 +122,14 @@
 
             cursorColorPick = createColorPicker(CURSOR_COLOR);
             cursorColorPick.size(COLOR_PICK_SIZE, COLOR_PICK_SIZE);
-            cursorColorPick.position(-WIDTH, -HEIGHT);
             for (i = 0; i < preBoxColors.length; i++) {
                 preBoxColorPicks.push(createColorPicker(preBoxColors[i]));
                 preBoxColorPicks[i].position(-WIDTH, -HEIGHT);
                 preBoxColorPicks[i].size(COLOR_PICK_SIZE, COLOR_PICK_SIZE);
             }
+
+            // hide positions
+            hideMenuGui();
         }
 
         function drawHealthBar(basedecayBar) {
@@ -172,7 +174,7 @@
         function drawBoxes() {
             currentBox.display();
             for (i = preBoxes.length - 1; i >= 0; i--) {
-                preBoxes[i].display();
+                preBoxes[i].display(8, 255 / (showTransCheck.checked() ? (i + 1) : 1));
             }
         }
 
@@ -180,12 +182,12 @@
             if (!showLinesCheck.checked()) {
                 return;
             }
-            stroke(preBoxes[0].c);
-            line(currentBox.x, currentBox.y, preBoxes[0].x, preBoxes[0].y);
-            for (i = 1; i < preBoxes.length; i++) {
+            for (i = preBoxes.length - 1; i > 0; i--) {
                 stroke(preBoxes[i].c);
                 line(preBoxes[i - 1].x, preBoxes[i - 1].y, preBoxes[i].x, preBoxes[i].y);
             }
+            stroke(preBoxes[0].c);
+            line(currentBox.x, currentBox.y, preBoxes[0].x, preBoxes[0].y);
         }
 
         function drawScoreBoard() {
@@ -268,6 +270,43 @@
             line(mouseX, mouseY, pmouseX, pmouseY);
         }
 
+        function updateMenuPositions() {
+            const vertPad = 28;
+            const vertPadSlid = 60;
+            const vomMenuX = canvasPaddingX + MENU_X;
+            const vomSlidX = MENU_X + SLIDER_LENGTH * 2;
+
+            backButton.position(canvasPaddingX, canvasPaddingY);
+            gamemodesRadio.position(vomMenuX, canvasPaddingY + 100);
+            gridSizeSlider.position(vomMenuX, canvasPaddingY + 150);
+            timeSlider.position(    vomMenuX, canvasPaddingY + 150 + vertPadSlid);
+            preBoxSlider.position(vomMenuX + SLIDER_LENGTH * 2, canvasPaddingY + 150);
+            showLinesCheck.position(vomMenuX + SLIDER_LENGTH * 2 + 75, canvasPaddingY + 200);
+            showTransCheck.position(vomMenuX + SLIDER_LENGTH * 2 + 75, canvasPaddingY + 227);
+
+            textAlign(LEFT);
+            textSize(SCOREBOARD_TEXTSIZE / 1.5);
+            fill('black');
+            strokeWeight(0.25);
+            text("Size:", MENU_X, MENU_Y);
+            text("Time:", MENU_X, MENU_Y + vertPadSlid);
+            text("Premove:", vomSlidX, MENU_Y);
+            text(gridSizeSlider.value(), MENU_X + 35, MENU_Y);
+            text(timeSlider.value(),     MENU_X + 35, MENU_Y + vertPadSlid);
+            text(preBoxSlider.value(),   MENU_X + 60 + SLIDER_LENGTH * 2, MENU_Y);
+            text("Show Lines:",     vomSlidX, MENU_Y + vertPad);
+            text("Transparent:",    vomSlidX, MENU_Y + vertPad * 2);
+            text("Cursor:",         vomSlidX, MENU_Y + vertPad * 3);
+            text("Premove Colors:", vomSlidX, MENU_Y + vertPad * 4);
+            // colors
+            cursorColorPick.position(vomMenuX + SLIDER_LENGTH * 2 + 68, canvasPaddingY + 225 + vertPad);
+            for (i = 0; i < preBoxColorPicks.length; i++) {
+                preBoxColorPicks[i].position(vomMenuX + SLIDER_LENGTH * 2 + i * 30, canvasPaddingY + 280 + vertPad);
+                text(i + 1, vomSlidX + 8 + i * 30, MENU_Y + vertPad * 5)
+            }
+            textAlign(CENTER);
+        }
+
         // objects
 
         function BOX(initX, initY, color) {
@@ -292,11 +331,11 @@
             this.y = initY;
             this.c = color;
 
-            this.display = function() {
+            this.display = function(weight, transparency) {
                 noFill();
-                stroke(this.c);
-                strokeWeight(4);
-                rect(this.x, this.y, boxSize, boxSize);
+                stroke(red(this.c), green(this.c), blue(this.c), transparency);
+                strokeWeight(weight);
+                rect(this.x + weight / 4, this.y + weight / 4, boxSize - weight / 2, boxSize - weight / 2);
             }
 
             this.setPos = function(newX, newY) {
@@ -338,10 +377,15 @@
         function initGame() {
             startGame = true;
             firstGame = false;
-            time = DEFAULT_TIME;
+            time = maxTime;
             decayBar = 0;
             combo = 0;
             score = 0;
+            // reset colors
+            preBoxesColorCycle = preBoxes.length - 1;
+            for (i = preBoxes.length - 1; i >= 0; i--) {
+                preBoxes[i].c = preBoxColors[i];
+            }
 
             // get buttons out of sight
             startButton.position(-WIDTH, -HEIGHT);
@@ -368,6 +412,7 @@
                 // sets the previous pre-box to the next one
                 for (i = 1; i < preBoxes.length; i++) {
                     preBoxes[i - 1].setPos(preBoxes[i].x, preBoxes[i].y);
+                    preBoxes[i - 1].c = preBoxes[i].c;
                 }
 
                 // sets last pre-box to another location depending on gamemode
@@ -378,6 +423,8 @@
                 } else if (gamemodesRadio.value() == 3 || (gamemodesRadio.value() == 4 && mixedRandMode == 3)) {
                     jumpy();
                 }
+                preBoxesColorCycle = (preBoxesColorCycle + 1) % preBoxes.length;
+                preBoxes[preBoxes.length - 1].c = preBoxColors[preBoxesColorCycle];
             }
 
             // combo and points
@@ -440,6 +487,12 @@
             if (!startGame) {
                 return;
             }
+
+            if (keyCode == ESCAPE) {
+                startGame = false;
+                time = 0;
+                return;
+            }
             gameplay();
         }
 
@@ -448,33 +501,6 @@
                 return;
             }
             gameplay();
-        }
-
-        function updateMenuPositions() {
-            const vertPad = 28;
-            backButton.position(canvasPaddingX, canvasPaddingY);
-            gamemodesRadio.position(canvasPaddingX + RADIO_X, canvasPaddingY + 100);
-            gridSizeSlider.position(canvasPaddingX + RADIO_X, canvasPaddingY + 150);
-            preBoxSlider.position(canvasPaddingX + RADIO_X + SLIDER_LENGTH * 2, canvasPaddingY + 150);
-            showLinesCheck.position(canvasPaddingX + RADIO_X + SLIDER_LENGTH * 2 + 75, canvasPaddingY + 200);
-            textAlign(LEFT);
-            textSize(SCOREBOARD_TEXTSIZE / 1.5);
-            fill('black');
-            strokeWeight(0.25);
-            text("Size:", RADIO_X, 185);
-            text(gridSizeSlider.value(), RADIO_X + 35, 185);
-            text("Premove:", RADIO_X + SLIDER_LENGTH * 2, 185);
-            text(preBoxSlider.value(), RADIO_X + 60 + SLIDER_LENGTH * 2, 185);
-            text("Show Lines:", RADIO_X + SLIDER_LENGTH * 2, 185 + vertPad);
-            text("Cursor:", RADIO_X + SLIDER_LENGTH * 2, 185 + vertPad * 2);
-            text("Premove Colors:", RADIO_X + SLIDER_LENGTH * 2, 185 + vertPad * 3)
-            // colors
-            cursorColorPick.position(canvasPaddingX + RADIO_X + SLIDER_LENGTH * 2 + 66, canvasPaddingY + 225);
-            for (i = 0; i < preBoxColorPicks.length; i++) {
-                preBoxColorPicks[i].position(canvasPaddingX + RADIO_X + SLIDER_LENGTH * 2 + i * 30, canvasPaddingY + 280);
-                text(i + 1, RADIO_X + SLIDER_LENGTH * 2 + 8 + i * 30, 185 + vertPad * 5)
-            }
-            textAlign(CENTER);
         }
 
         // buttons
@@ -489,13 +515,9 @@
         // when back button is clicked
         function backGame() {
             isInMenu = false;
-            backButton.position(-WIDTH, -HEIGHT);
             menuButton.position(canvasPaddingX, canvasPaddingY);
-            gamemodesRadio.position(-WIDTH, -HEIGHT);
-            gridSizeSlider.position(-WIDTH, -HEIGHT);
-            preBoxSlider.position(-WIDTH, -HEIGHT);
-            showLinesCheck.position(-WIDTH, -HEIGHT);
-            cursorColorPick.position(-WIDTH, -HEIGHT);
+            hideMenuGui();
+
             for (i = 0; i < preBoxColors.length; i++) {
                 preBoxColorPicks[i].position(-WIDTH, -HEIGHT);
                 preBoxColors[i] = preBoxColorPicks[i].color();
@@ -510,6 +532,20 @@
             for (i = 0; i < preBoxSlider.value(); i++) {
                 preBoxes.push(new PRE_BOX(0, 0, preBoxColors[i]));
             }
+            // set time
+            maxTime = timeSlider.value();
+        }
+
+        function hideMenuGui() {
+            restartButton.position(-WIDTH, -HEIGHT);
+            backButton.position(-WIDTH, -HEIGHT);
+            gridSizeSlider.position(-WIDTH, -HEIGHT);
+            preBoxSlider.position(-WIDTH, -HEIGHT);
+            timeSlider.position(-WIDTH, -HEIGHT);
+            gamemodesRadio.position(-WIDTH, -HEIGHT);
+            showLinesCheck.position(-WIDTH, -HEIGHT);
+            showTransCheck.position(-WIDTH, -HEIGHT);
+            cursorColorPick.position(-WIDTH, -HEIGHT);
         }
 
         // allow dynamic canvas resizing
