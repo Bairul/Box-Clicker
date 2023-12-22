@@ -11,6 +11,7 @@ const HEIGHT = 500;
         const HEALTHBAR_SEG_LEN = 100;
         const HEALTHBAR_SEG_WID = HEALTHBAR_SEG_LEN / 2;
         const HEALTH_GAIN = HEALTHBAR_SEG_LEN / 3;
+        const MISS_COMBO = HEALTHBAR_SEG_LEN / 5;
         const MIN_DECAYBAR = HEALTHBAR_Y - 5;
         const MIXED_INTERVAL = 90;
 
@@ -44,7 +45,7 @@ const HEIGHT = 500;
         // objects
         let currentBox;
         let preBoxes = [];
-        let preBoxColors = ['red', 'orange', 'blue', 'purple'];
+        let preBoxColors = ['red', 'blue', 'lime', 'yellow'];
 
         // buttons
         let startButton;
@@ -52,8 +53,9 @@ const HEIGHT = 500;
         let menuButton;
         let backButton;
         let isInMenu = false;
-        // radios
-        let gamemodesRadio;
+        // selects
+        let gamemodesSelect;
+        let difficultySelect;
         // sliders
         let gridSizeSlider;
         let preBoxSlider;
@@ -62,6 +64,7 @@ const HEIGHT = 500;
         // checkboxes
         let showLinesCheck;
         let showTransCheck;
+        let mouseCheck;
         // colors
         let cursorColorPick;
         let preBoxColorPicks = [];
@@ -75,13 +78,15 @@ const HEIGHT = 500;
             textAlign(CENTER);
 
             // dom stuff
-            startButton = createButton("Start");
-            restartButton = createButton("Restart");
-            menuButton = createButton("Menu");
-            backButton = createButton("Back");
-            gamemodesRadio = createRadio();
+            startButton = createButton('Start');
+            restartButton = createButton('Restart');
+            menuButton = createButton('Menu');
+            backButton = createButton('Back');
+            gamemodesSelect = createSelect();
+            difficultySelect = createSelect();
             showLinesCheck = createCheckbox();
             showTransCheck = createCheckbox();
+            mouseCheck = createCheckbox("", true);
             gridSizeSlider = createSlider(4, 8, gridSize, 1);
             preBoxSlider = createSlider(0, preBoxColors.length, 1, 1);
             preBoxWeightSlider = createSlider(4, 12, DEFAULT_WEIGHT, 2);
@@ -105,12 +110,18 @@ const HEIGHT = 500;
             menuButton.mouseClicked(menuChoose);
             backButton.mouseClicked(backGame);
 
-            // gamemodesRadio
-            gamemodesRadio.option('  Classic ', 1);
-            gamemodesRadio.option('  Streamy ', 2);
-            gamemodesRadio.option('  Jumpy ', 3);
-            gamemodesRadio.option('  Mixed ', 4);
-            gamemodesRadio.selected(1);
+            // gamemodes radio
+            gamemodesSelect.option('Classic', 1);
+            gamemodesSelect.option('Streamy', 2);
+            gamemodesSelect.option('Jumpy', 3);
+            gamemodesSelect.option('Mixed', 4);
+            gamemodesSelect.selected(1);
+            // diffculty radio
+            difficultySelect.option('Easy', 0.5);
+            difficultySelect.option('Normal', 1);
+            difficultySelect.option('Hard', 2);
+            difficultySelect.option('Nightmare', 2.5);
+            difficultySelect.selected(1);
 
             // objects
             currentBox = new BOX(0, 0, 'black');
@@ -154,13 +165,13 @@ const HEIGHT = 500;
             // natural decayBar of health gets faster over time
             if (decayBar >= MIN_DECAYBAR) {
                 decayBar = MIN_DECAYBAR;
-            } else {
-                if (time < DEFAULT_TIME / 3) {
-                    decayBar += basedecayBar + 1;
-                } else if (time >= DEFAULT_TIME / 3 && time < DEFAULT_TIME / 3 * 2) {
-                    decayBar += basedecayBar + 0.5;
+            } else if (startGame) {
+                if (time < maxTime / 3) {
+                    decayBar += basedecayBar + 1 * difficultySelect.value();
+                } else if (time >= maxTime / 3 && time < maxTime / 3 * 2) {
+                    decayBar += basedecayBar + 0.5 * difficultySelect.value();
                 } else {
-                    decayBar += basedecayBar;
+                    decayBar += basedecayBar * difficultySelect.value();
                 }
             }
             // decay bar
@@ -226,7 +237,7 @@ const HEIGHT = 500;
             }
 
             // for mixed gamemode
-            if (gamemodesRadio.value() == 4 && frameCount % MIXED_INTERVAL == 0) {
+            if (gamemodesSelect.value() == 4 && frameCount % MIXED_INTERVAL == 0) {
                 mixedRandMode = floor(random(1, 4));
             }
             // changes color of countdown timer to red when less than 5 sec
@@ -272,16 +283,20 @@ const HEIGHT = 500;
             const vertPad = 28;
             const vertPadSlid = 60;
             const vomMenuX = canvasPaddingX + MENU_X;
-            const vomSlidX = MENU_X + SLIDER_LENGTH * 2;
+            const vomMenuY = canvasPaddingY + 150;
+            const vomSlidX =     MENU_X   + SLIDER_LENGTH * 2;
+            const vomMenuSlidX = vomMenuX + SLIDER_LENGTH * 2;
 
             backButton.position(canvasPaddingX, canvasPaddingY);
-            gamemodesRadio.position(vomMenuX, canvasPaddingY + 100);
-            gridSizeSlider.position(vomMenuX, canvasPaddingY + 150);
-            timeSlider.position(    vomMenuX, canvasPaddingY + 150 + vertPadSlid);
-            preBoxSlider.position(vomMenuX + SLIDER_LENGTH * 2, canvasPaddingY + 150);
-            showLinesCheck.position(vomMenuX + SLIDER_LENGTH * 2 + 75, canvasPaddingY + 199);
-            showTransCheck.position(vomMenuX + SLIDER_LENGTH * 2 + 75, canvasPaddingY + 227);
-            preBoxWeightSlider.position(vomMenuX + SLIDER_LENGTH * 2, canvasPaddingY + 345);
+            gamemodesSelect.position(vomMenuX, canvasPaddingY + 100);
+            difficultySelect.position(vomMenuSlidX, canvasPaddingY + 100);
+            gridSizeSlider.position(vomMenuX, vomMenuY);
+            timeSlider.position(    vomMenuX, vomMenuY + vertPadSlid);
+            mouseCheck.position(    vomMenuX + 80, vomMenuY + 109);
+            preBoxSlider.position(  vomMenuSlidX, vomMenuY);
+            showLinesCheck.position(vomMenuSlidX + 75, vomMenuY + 49);
+            showTransCheck.position(vomMenuSlidX + 75, vomMenuY + 77);
+            preBoxWeightSlider.position(vomMenuSlidX, vomMenuY + 195);
 
             textAlign(LEFT);
             textSize(SCOREBOARD_TEXTSIZE / 1.5);
@@ -289,6 +304,7 @@ const HEIGHT = 500;
             strokeWeight(0.25);
             text("Size: " + gridSizeSlider.value(), MENU_X, MENU_Y);
             text("Time: " + timeSlider.value(),     MENU_X, MENU_Y + vertPadSlid);
+            text("Mouse Click:", MENU_X, MENU_Y + vertPadSlid + vertPad);
             text("Premove: " + preBoxSlider.value(), vomSlidX, MENU_Y);
             text("Show Lines:",     vomSlidX, MENU_Y + vertPad);
             text("Transparent:",    vomSlidX, MENU_Y + vertPad * 2);
@@ -296,12 +312,27 @@ const HEIGHT = 500;
             text("Premove Colors:", vomSlidX, MENU_Y + vertPad * 4);
             text("Weight: " + preBoxWeightSlider.value(), vomSlidX, MENU_Y + vertPad * 7);
             // colors
-            cursorColorPick.position(vomMenuX + SLIDER_LENGTH * 2 + 68, canvasPaddingY + 224 + vertPad);
+            cursorColorPick.position(vomMenuSlidX + 68, canvasPaddingY + 224 + vertPad);
             for (i = 0; i < preBoxColorPicks.length; i++) {
-                preBoxColorPicks[i].position(vomMenuX + SLIDER_LENGTH * 2 + i * 30, canvasPaddingY + 280 + vertPad);
+                preBoxColorPicks[i].position(vomMenuSlidX + i * 30, canvasPaddingY + 280 + vertPad);
                 text(i + 1, vomSlidX + 8 + i * 30, MENU_Y + vertPad * 5)
             }
             textAlign(CENTER);
+        }
+
+        function hideMenuGui() {
+            restartButton.position(-WIDTH, -HEIGHT);
+            backButton.position(-WIDTH, -HEIGHT);
+            gridSizeSlider.position(-WIDTH, -HEIGHT);
+            preBoxSlider.position(-WIDTH, -HEIGHT);
+            preBoxWeightSlider.position(-WIDTH, -HEIGHT);
+            timeSlider.position(-WIDTH, -HEIGHT);
+            gamemodesSelect.position(-WIDTH, -HEIGHT);
+            difficultySelect.position(-WIDTH, -HEIGHT);
+            showLinesCheck.position(-WIDTH, -HEIGHT);
+            showTransCheck.position(-WIDTH, -HEIGHT);
+            mouseCheck.position(-WIDTH, -HEIGHT);
+            cursorColorPick.position(-WIDTH, -HEIGHT);
         }
 
         // objects
@@ -395,9 +426,14 @@ const HEIGHT = 500;
 
         function gameplay() {
             if (!isOnMouse(currentBox.x, currentBox.y)) { // miss
+                if (difficultySelect.value() == 2.5) { // nightmare mode
+                    startGame = false;
+                    time = 0;
+                    return;
+                }
                 // broken combo
                 combo = 0;
-                decayBar += 20;
+                decayBar += MISS_COMBO * difficultySelect.value();
                 return;
             }
 
@@ -413,11 +449,11 @@ const HEIGHT = 500;
                 }
 
                 // sets last pre-box to another location depending on gamemode
-                if (gamemodesRadio.value() == 1 || (gamemodesRadio.value() == 4 && mixedRandMode == 1)) {
+                if (gamemodesSelect.value() == 1 || (gamemodesSelect.value() == 4 && mixedRandMode == 1)) {
                     preBoxes[preBoxes.length - 1].setPos(genRandGridVal(), genRandGridVal());
-                } else if (gamemodesRadio.value() == 2 || (gamemodesRadio.value() == 4 && mixedRandMode == 2)) {
+                } else if (gamemodesSelect.value() == 2 || (gamemodesSelect.value() == 4 && mixedRandMode == 2)) {
                     streamy();
-                } else if (gamemodesRadio.value() == 3 || (gamemodesRadio.value() == 4 && mixedRandMode == 3)) {
+                } else if (gamemodesSelect.value() == 3 || (gamemodesSelect.value() == 4 && mixedRandMode == 3)) {
                     jumpy();
                 }
                 preBoxesColorCycle = (preBoxesColorCycle + 1) % preBoxes.length;
@@ -494,7 +530,7 @@ const HEIGHT = 500;
         }
 
         function mousePressed() {
-            if (!startGame) {
+            if (!startGame || !mouseCheck.checked()) {
                 return;
             }
             gameplay();
@@ -531,19 +567,6 @@ const HEIGHT = 500;
             }
             // set time
             maxTime = timeSlider.value();
-        }
-
-        function hideMenuGui() {
-            restartButton.position(-WIDTH, -HEIGHT);
-            backButton.position(-WIDTH, -HEIGHT);
-            gridSizeSlider.position(-WIDTH, -HEIGHT);
-            preBoxSlider.position(-WIDTH, -HEIGHT);
-            preBoxWeightSlider.position(-WIDTH, -HEIGHT);
-            timeSlider.position(-WIDTH, -HEIGHT);
-            gamemodesRadio.position(-WIDTH, -HEIGHT);
-            showLinesCheck.position(-WIDTH, -HEIGHT);
-            showTransCheck.position(-WIDTH, -HEIGHT);
-            cursorColorPick.position(-WIDTH, -HEIGHT);
         }
 
         // allow dynamic canvas resizing
