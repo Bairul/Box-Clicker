@@ -8,6 +8,7 @@
     <script>
         const HEIGHT = 500;
         const WIDTH = 600;
+        const MIN_PADDING = 8;
         const DEFAULT_TIME = 30;
         const GRID_SIZE = 5;
         const BOX_SIZE = HEIGHT / GRID_SIZE;
@@ -25,6 +26,8 @@
         const BUTTON_HEIGHT = 30;
         const CURSOR_COLOR = 'red';
         
+        let canvasPaddingX = 0;
+        let canvasPaddingY = 0;
         let startGame = false;
         let firstGame = true;
         let i;
@@ -51,7 +54,10 @@
         let isInMenu = false;
         
         function setup() {
-            createCanvas(WIDTH, HEIGHT);
+            canvasPaddingX = max(MIN_PADDING, (window.innerWidth - WIDTH) / 2);
+            canvasPaddingY = max(MIN_PADDING, (window.innerHeight - HEIGHT) / 2);
+            canvas = createCanvas(WIDTH, HEIGHT);
+            canvas.position(canvasPaddingX, canvasPaddingY);
             rectMode(CENTER);
             textAlign(CENTER);
 
@@ -69,7 +75,7 @@
             backButton.size(60, BUTTON_HEIGHT);
 
             restartButton.position(-WIDTH, -HEIGHT);
-            menuButton.position(8,8);
+            menuButton.position(canvasPaddingX, canvasPaddingY);
             backButton.position(-WIDTH, -HEIGHT);
 
             // button functions
@@ -267,6 +273,7 @@
         // gameloop
         function draw() {
             background(175, 200, 255);
+            console.log(window.innerWidth);
 
             if (startGame) {
                 drawGrid();
@@ -280,14 +287,14 @@
                 if (isInMenu) {
                     return;
                 }
+                menuButton.position(canvasPaddingX, canvasPaddingY);
 
                 if (firstGame) {
-                    startButton.position(WIDTH / 2 - 40, HEIGHT / 2 - BUTTON_HEIGHT / 2);
+                    startButton.position(canvasPaddingX + WIDTH / 2 - 40, canvasPaddingY + HEIGHT / 2 - BUTTON_HEIGHT / 2);
                 } else {
                     drawScoreBoard();
                     drawHealthBar(-1);
-                    menuButton.position(8,8);
-                    restartButton.position(WIDTH / 2 - 90, HEIGHT / 2 - BUTTON_HEIGHT / 2);
+                    restartButton.position(canvasPaddingX + WIDTH / 2 - 90, canvasPaddingY + HEIGHT / 2 - BUTTON_HEIGHT / 2);
                 }
             }
         }
@@ -410,17 +417,22 @@
             startButton.position(-WIDTH, -HEIGHT);
             restartButton.position(-WIDTH, -HEIGHT);
             menuButton.position(-WIDTH, -HEIGHT);
-            backButton.position(8, 8);
-            gamemodes.position(150, 100);
+            backButton.position(canvasPaddingX, canvasPaddingY);
+            gamemodes.position(canvasPaddingX + 150, canvasPaddingY + 100);
         }
         // when back button is clicked
         function backGame() {
             isInMenu = false;
             backButton.position(-WIDTH, -HEIGHT);
-            menuButton.position(8, 8);
+            menuButton.position(canvasPaddingX, canvasPaddingY);
             gamemodes.position(-WIDTH, -HEIGHT);
         }
-    
+
+        window.onresize = function() { // allow dynamic resizing
+            canvasPaddingX = max(MIN_PADDING, (window.innerWidth - WIDTH) / 2);
+            canvasPaddingY = max(MIN_PADDING, (window.innerHeight - HEIGHT) / 2);
+            canvas.position(canvasPaddingX, canvasPaddingY);
+        }
     </script>
 </head>
 <body>
