@@ -9,9 +9,8 @@
         const HEIGHT = 500;
         const WIDTH = 600;
         const MIN_PADDING = 8;
-        const DEFAULT_TIME = 30;
-        const GRID_SIZE = 5;
-        const BOX_SIZE = HEIGHT / GRID_SIZE;
+        const DEFAULT_TIME = 9;
+        const DEFAULT_GRID_SIZE = 5;
 
         const SCOREBOARD_WIDTH = 100;
         const SCOREBOARD_X = WIDTH - SCOREBOARD_WIDTH / 2;
@@ -23,8 +22,10 @@
         const MIN_DECAYBAR = HEALTHBAR_Y - 5;
         const MIXED_INTERVAL = 90;
 
+        const RADIO_X = 150;
         const BUTTON_HEIGHT = 30;
         const CURSOR_COLOR = 'red';
+        const SLIDER_LENGTH = 100;
         
         let canvasPaddingX = 0;
         let canvasPaddingY = 0;
@@ -33,6 +34,8 @@
         let i;
 
         // gameplay variables
+        let boxSize = HEIGHT / DEFAULT_GRID_SIZE;
+        let gridSize = DEFAULT_GRID_SIZE;
         let time = DEFAULT_TIME;
         let score = 0;
         let highScore = 0;
@@ -44,14 +47,19 @@
         // objects
         let currentBox;
         let preBoxes = [];
+        let preBoxColors = ['red', 'orange', 'blue', 'purple'];
 
         // buttons
         let startButton;
         let restartButton;
         let menuButton;
         let backButton;
-        let gamemodes;
         let isInMenu = false;
+        // radios
+        let gamemodesRadio;
+        // sliders
+        let gridSizeSlider;
+        let preBoxSlider;
         
         function setup() {
             canvasPaddingX = max(MIN_PADDING, (window.innerWidth - WIDTH) / 2);
@@ -61,22 +69,28 @@
             rectMode(CENTER);
             textAlign(CENTER);
 
-            // buttons
+            // dom stuff
             startButton = createButton("Start");
             restartButton = createButton("Restart");
             menuButton = createButton("Menu");
             backButton = createButton("Back");
-            gamemodes = createRadio();
+            gamemodesRadio = createRadio();
+            gridSizeSlider = createSlider(4, 8, gridSize, 1);
+            preBoxSlider = createSlider(0, preBoxColors.length, 1, 1);
 
             // set button size and position
             startButton.size(80, BUTTON_HEIGHT);
             restartButton.size(90, BUTTON_HEIGHT);
             menuButton.size(60, BUTTON_HEIGHT);
             backButton.size(60, BUTTON_HEIGHT);
+            gridSizeSlider.size(SLIDER_LENGTH);
+            preBoxSlider.size(SLIDER_LENGTH);
 
             restartButton.position(-WIDTH, -HEIGHT);
             menuButton.position(canvasPaddingX, canvasPaddingY);
             backButton.position(-WIDTH, -HEIGHT);
+            gridSizeSlider.position(-WIDTH, -HEIGHT);
+            preBoxSlider.position(-WIDTH, -HEIGHT);
 
             // button functions
             restartButton.mouseClicked(initGame);
@@ -84,18 +98,17 @@
             menuButton.mouseClicked(menuChoose);
             backButton.mouseClicked(backGame);
 
-            // gamemodes
-            gamemodes.option('  Classic ', 1);
-            gamemodes.option('  Streamy ', 2);
-            gamemodes.option('  Jumpy ', 3);
-            gamemodes.option('  Mixed ', 4);
-            gamemodes.selected(1);
-            gamemodes.position(-WIDTH, -HEIGHT);
+            // gamemodesRadio
+            gamemodesRadio.option('  Classic ', 1);
+            gamemodesRadio.option('  Streamy ', 2);
+            gamemodesRadio.option('  Jumpy ', 3);
+            gamemodesRadio.option('  Mixed ', 4);
+            gamemodesRadio.selected(1);
+            gamemodesRadio.position(-WIDTH, -HEIGHT);
 
             // objects
-            currentBox = new BOX(genRandGridVal(), genRandGridVal(), 'black');
-            preBoxes.push(new PRE_BOX(genRandGridVal(), genRandGridVal(), 'red'));
-            // preBoxes.push(new PRE_BOX(genRandGridVal(), genRandGridVal(), 'blue'));
+            currentBox = new BOX(0, 0, 'black');
+            preBoxes.push(new PRE_BOX(0, 0, preBoxColors[0]));
         }
 
         function drawHealthBar(basedecayBar) {
@@ -191,7 +204,7 @@
             }
 
             // for mixed gamemode
-            if (gamemodes.value() == 4 && frameCount % MIXED_INTERVAL == 0) {
+            if (gamemodesRadio.value() == 4 && frameCount % MIXED_INTERVAL == 0) {
                 mixedRandMode = floor(random(1, 4));
             }
             // changes color of countdown timer to red when less than 5 sec
@@ -220,9 +233,9 @@
         function drawGrid() { // background grid
             strokeWeight(3);
             stroke(100, 100, 100);
-            for(i = 1; i <= GRID_SIZE; i++) {
-                line(HEIGHT * i / GRID_SIZE, 0, HEIGHT * i / GRID_SIZE, HEIGHT);
-                line(0, HEIGHT * i / GRID_SIZE, HEIGHT, HEIGHT * i / GRID_SIZE);
+            for(i = 1; i <= gridSize; i++) {
+                line(HEIGHT * i / gridSize, 0, HEIGHT * i / gridSize, HEIGHT);
+                line(0, HEIGHT * i / gridSize, HEIGHT, HEIGHT * i / gridSize);
             }
         }
 
@@ -243,7 +256,7 @@
             this.display = function() {
                 fill(this.c);
                 noStroke();
-                rect(this.x, this.y, BOX_SIZE, BOX_SIZE);
+                rect(this.x, this.y, boxSize, boxSize);
             }
 
             this.setPos = function(newX, newY) {
@@ -261,7 +274,7 @@
                 noFill();
                 stroke(this.c);
                 strokeWeight(4);
-                rect(this.x, this.y, BOX_SIZE, BOX_SIZE);
+                rect(this.x, this.y, boxSize, boxSize);
             }
 
             this.setPos = function(newX, newY) {
@@ -273,7 +286,6 @@
         // gameloop
         function draw() {
             background(175, 200, 255);
-            console.log(window.innerWidth);
 
             if (startGame) {
                 drawGrid();
@@ -285,6 +297,7 @@
             } else {
                 cursor();
                 if (isInMenu) {
+                    updateMenuPositions();
                     return;
                 }
                 menuButton.position(canvasPaddingX, canvasPaddingY);
@@ -318,8 +331,17 @@
         }
 
         function gameplay() {
-            if (isOnMouse(currentBox.x, currentBox.y)) {
-                // sets current to the first pre-box
+            if (!isOnMouse(currentBox.x, currentBox.y)) { // miss
+                // broken combo
+                combo = 0;
+                decayBar += 20;
+                return;
+            }
+            
+            // sets current to the first pre-box
+            if (preBoxes.length == 0) {
+                currentBox.setPos(genRandGridVal(), genRandGridVal());
+            } else {
                 currentBox.setPos(preBoxes[0].x, preBoxes[0].y);
                 // sets the previous pre-box to the next one
                 for (i = 1; i < preBoxes.length; i++) {
@@ -327,41 +349,37 @@
                 }
 
                 // sets last pre-box to another location depending on gamemode
-                if (gamemodes.value() == 1 || (gamemodes.value() == 4 && mixedRandMode == 1)) {
+                if (gamemodesRadio.value() == 1 || (gamemodesRadio.value() == 4 && mixedRandMode == 1)) {
                     preBoxes[preBoxes.length - 1].setPos(genRandGridVal(), genRandGridVal());
-                } else if (gamemodes.value() == 2 || (gamemodes.value() == 4 && mixedRandMode == 2)) {
+                } else if (gamemodesRadio.value() == 2 || (gamemodesRadio.value() == 4 && mixedRandMode == 2)) {
                     streamy();
-                } else if (gamemodes.value() == 3 || (gamemodes.value() == 4 && mixedRandMode == 3)) {
+                } else if (gamemodesRadio.value() == 3 || (gamemodesRadio.value() == 4 && mixedRandMode == 3)) {
                     jumpy();
                 }
+            }
 
-                // combo and points
-                combo++;
-                score += point * combo; // point system
-                if (decayBar > HEALTH_GAIN) {
-                    decayBar -= HEALTH_GAIN;
-                } else { // avoid overfill
-                    decayBar -= decayBar;
-                }
-            } else {
-                // broken combo
-                combo = 0;
-                decayBar += 20;
+            // combo and points
+            combo++;
+            score += point * combo; // point system
+            if (decayBar > HEALTH_GAIN) {
+                decayBar -= HEALTH_GAIN;
+            } else { // avoid overfill
+                decayBar -= decayBar;
             }
         }
 
         function streamy() {
             let randX = floor(random(0, 3)) - 1;
             let randY = floor(random(0, 3)) - 1;
-            let newX = preBoxes[preBoxes.length - 1].x + randX * BOX_SIZE;
-            let newY = preBoxes[preBoxes.length - 1].y + randY * BOX_SIZE;
+            let newX = preBoxes[preBoxes.length - 1].x + randX * boxSize;
+            let newY = preBoxes[preBoxes.length - 1].y + randY * boxSize;
             while (newX > WIDTH - SCOREBOARD_WIDTH || newX < 0) {
                 randX = floor(random(0, 3)) - 1;
-                newX = preBoxes[preBoxes.length - 1].x + randX * BOX_SIZE;
+                newX = preBoxes[preBoxes.length - 1].x + randX * boxSize;
             }
             while (newY > HEIGHT || newY < 0) {
                 randY = floor(random(0, 3)) - 1;
-                newY = preBoxes[preBoxes.length - 1].y + randY * BOX_SIZE;
+                newY = preBoxes[preBoxes.length - 1].y + randY * boxSize;
             }
             preBoxes[preBoxes.length - 1].setPos(newX, newY);
         }
@@ -370,10 +388,10 @@
             let newX = genRandGridVal();
             let newY = genRandGridVal();
 
-            while (abs(preBoxes[preBoxes.length - 1].x - newX) < BOX_SIZE) {
+            while (abs(preBoxes[preBoxes.length - 1].x - newX) < boxSize) {
                 newX = genRandGridVal();
             }
-            while (abs(preBoxes[preBoxes.length - 1].y - newY) < BOX_SIZE) {
+            while (abs(preBoxes[preBoxes.length - 1].y - newY) < boxSize) {
                 newY = genRandGridVal();
             }
 
@@ -381,8 +399,8 @@
         }
 
         function isOnMouse(x, y) {
-            return mouseX < x + BOX_SIZE / 2 && mouseX > x - BOX_SIZE / 2
-                && mouseY < y + BOX_SIZE / 2 && mouseY > y - BOX_SIZE / 2;
+            return mouseX < x + boxSize / 2 && mouseX > x - boxSize / 2
+                && mouseY < y + boxSize / 2 && mouseY > y - boxSize / 2;
         }
 
         function randAllBoxes() {
@@ -393,7 +411,7 @@
         }
 
         function genRandGridVal() {
-            return (floor(random(0, GRID_SIZE)) + 0.5) * BOX_SIZE;
+            return (floor(random(0, gridSize)) + 0.5) * boxSize;
         }
 
         function keyPressed() {
@@ -410,6 +428,22 @@
             gameplay();
         }
 
+        function updateMenuPositions() {
+            backButton.position(canvasPaddingX, canvasPaddingY);
+            gamemodesRadio.position(canvasPaddingX + RADIO_X, canvasPaddingY + 100);
+            gridSizeSlider.position(canvasPaddingX + RADIO_X, canvasPaddingY + 150);
+            preBoxSlider.position(canvasPaddingX + RADIO_X + SLIDER_LENGTH * 2, canvasPaddingY + 150);
+            textAlign(LEFT);
+            textSize(SCOREBOARD_TEXTSIZE / 1.5);
+            fill('black');
+            strokeWeight(0.25);
+            text("Size:", RADIO_X, 185);
+            text(gridSizeSlider.value(), RADIO_X + 35, 185);
+            text("Premove:", RADIO_X + SLIDER_LENGTH * 2, 185);
+            text(preBoxSlider.value(), RADIO_X + 60 + SLIDER_LENGTH * 2, 185);
+            textAlign(CENTER);
+        }
+
         // buttons
         // when menu button is clicked
         function menuChoose() {
@@ -417,15 +451,24 @@
             startButton.position(-WIDTH, -HEIGHT);
             restartButton.position(-WIDTH, -HEIGHT);
             menuButton.position(-WIDTH, -HEIGHT);
-            backButton.position(canvasPaddingX, canvasPaddingY);
-            gamemodes.position(canvasPaddingX + 150, canvasPaddingY + 100);
+            updateMenuPositions();
         }
         // when back button is clicked
         function backGame() {
             isInMenu = false;
             backButton.position(-WIDTH, -HEIGHT);
             menuButton.position(canvasPaddingX, canvasPaddingY);
-            gamemodes.position(-WIDTH, -HEIGHT);
+            gamemodesRadio.position(-WIDTH, -HEIGHT);
+            gridSizeSlider.position(-WIDTH, -HEIGHT);
+            preBoxSlider.position(-WIDTH, -HEIGHT);
+
+            gridSize = gridSizeSlider.value();
+            boxSize = HEIGHT / gridSize;
+
+            preBoxes.splice(0, preBoxes.length);
+            for (i = 0; i < preBoxSlider.value(); i++) {
+                preBoxes.push(new PRE_BOX(0, 0, preBoxColors[i]));
+            }
         }
 
         window.onresize = function() { // allow dynamic resizing
