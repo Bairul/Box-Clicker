@@ -26,6 +26,7 @@
         const BUTTON_HEIGHT = 30;
         const CURSOR_COLOR = 'red';
         const SLIDER_LENGTH = 100;
+        const COLOR_PICK_SIZE = 25;
         
         let canvasPaddingX = 0;
         let canvasPaddingY = 0;
@@ -60,6 +61,11 @@
         // sliders
         let gridSizeSlider;
         let preBoxSlider;
+        // checkboxes
+        let showLinesCheck;
+        // colors
+        let cursorColorPick;
+        let preBoxColorPicks = [];
         
         function setup() {
             canvasPaddingX = max(MIN_PADDING, (window.innerWidth - WIDTH) / 2);
@@ -75,6 +81,7 @@
             menuButton = createButton("Menu");
             backButton = createButton("Back");
             gamemodesRadio = createRadio();
+            showLinesCheck = createCheckbox();
             gridSizeSlider = createSlider(4, 8, gridSize, 1);
             preBoxSlider = createSlider(0, preBoxColors.length, 1, 1);
 
@@ -106,9 +113,21 @@
             gamemodesRadio.selected(1);
             gamemodesRadio.position(-WIDTH, -HEIGHT);
 
+            // checkboxes
+            showLinesCheck.position(-WIDTH, -HEIGHT);
+
             // objects
             currentBox = new BOX(0, 0, 'black');
             preBoxes.push(new PRE_BOX(0, 0, preBoxColors[0]));
+
+            cursorColorPick = createColorPicker(CURSOR_COLOR);
+            cursorColorPick.size(COLOR_PICK_SIZE, COLOR_PICK_SIZE);
+            cursorColorPick.position(-WIDTH, -HEIGHT);
+            for (i = 0; i < preBoxColors.length; i++) {
+                preBoxColorPicks.push(createColorPicker(preBoxColors[i]));
+                preBoxColorPicks[i].position(-WIDTH, -HEIGHT);
+                preBoxColorPicks[i].size(COLOR_PICK_SIZE, COLOR_PICK_SIZE);
+            }
         }
 
         function drawHealthBar(basedecayBar) {
@@ -158,6 +177,9 @@
         }
 
         function drawPreBoxLines() {
+            if (!showLinesCheck.checked()) {
+                return;
+            }
             stroke(preBoxes[0].c);
             line(currentBox.x, currentBox.y, preBoxes[0].x, preBoxes[0].y);
             for (i = 1; i < preBoxes.length; i++) {
@@ -239,9 +261,9 @@
             }
         }
 
-        function drawCursor(color) {
+        function drawCursor() {
             noCursor();
-            stroke(color);
+            stroke(cursorColorPick.color());
             strokeWeight(5);
             line(mouseX, mouseY, pmouseX, pmouseY);
         }
@@ -292,8 +314,8 @@
                 drawScoreBoard();
                 drawHealthBar(1);
                 drawBoxes();
-                // drawPreBoxLines();
-                drawCursor(CURSOR_COLOR);
+                drawPreBoxLines();
+                drawCursor();
             } else {
                 cursor();
                 if (isInMenu) {
@@ -337,7 +359,7 @@
                 decayBar += 20;
                 return;
             }
-            
+
             // sets current to the first pre-box
             if (preBoxes.length == 0) {
                 currentBox.setPos(genRandGridVal(), genRandGridVal());
@@ -429,10 +451,12 @@
         }
 
         function updateMenuPositions() {
+            const vertPad = 28;
             backButton.position(canvasPaddingX, canvasPaddingY);
             gamemodesRadio.position(canvasPaddingX + RADIO_X, canvasPaddingY + 100);
             gridSizeSlider.position(canvasPaddingX + RADIO_X, canvasPaddingY + 150);
             preBoxSlider.position(canvasPaddingX + RADIO_X + SLIDER_LENGTH * 2, canvasPaddingY + 150);
+            showLinesCheck.position(canvasPaddingX + RADIO_X + SLIDER_LENGTH * 2 + 75, canvasPaddingY + 200);
             textAlign(LEFT);
             textSize(SCOREBOARD_TEXTSIZE / 1.5);
             fill('black');
@@ -441,6 +465,15 @@
             text(gridSizeSlider.value(), RADIO_X + 35, 185);
             text("Premove:", RADIO_X + SLIDER_LENGTH * 2, 185);
             text(preBoxSlider.value(), RADIO_X + 60 + SLIDER_LENGTH * 2, 185);
+            text("Show Lines:", RADIO_X + SLIDER_LENGTH * 2, 185 + vertPad);
+            text("Cursor:", RADIO_X + SLIDER_LENGTH * 2, 185 + vertPad * 2);
+            text("Premove Colors:", RADIO_X + SLIDER_LENGTH * 2, 185 + vertPad * 3)
+            // colors
+            cursorColorPick.position(canvasPaddingX + RADIO_X + SLIDER_LENGTH * 2 + 66, canvasPaddingY + 225);
+            for (i = 0; i < preBoxColorPicks.length; i++) {
+                preBoxColorPicks[i].position(canvasPaddingX + RADIO_X + SLIDER_LENGTH * 2 + i * 30, canvasPaddingY + 280);
+                text(i + 1, RADIO_X + SLIDER_LENGTH * 2 + 8 + i * 30, 185 + vertPad * 5)
+            }
             textAlign(CENTER);
         }
 
@@ -461,17 +494,26 @@
             gamemodesRadio.position(-WIDTH, -HEIGHT);
             gridSizeSlider.position(-WIDTH, -HEIGHT);
             preBoxSlider.position(-WIDTH, -HEIGHT);
+            showLinesCheck.position(-WIDTH, -HEIGHT);
+            cursorColorPick.position(-WIDTH, -HEIGHT);
+            for (i = 0; i < preBoxColors.length; i++) {
+                preBoxColorPicks[i].position(-WIDTH, -HEIGHT);
+                preBoxColors[i] = preBoxColorPicks[i].color();
+            }
 
+            // sets grid size and box size
             gridSize = gridSizeSlider.value();
             boxSize = HEIGHT / gridSize;
 
+            // sets preboxes
             preBoxes.splice(0, preBoxes.length);
             for (i = 0; i < preBoxSlider.value(); i++) {
                 preBoxes.push(new PRE_BOX(0, 0, preBoxColors[i]));
             }
         }
 
-        window.onresize = function() { // allow dynamic resizing
+        // allow dynamic canvas resizing
+        window.onresize = function() { 
             canvasPaddingX = max(MIN_PADDING, (window.innerWidth - WIDTH) / 2);
             canvasPaddingY = max(MIN_PADDING, (window.innerHeight - HEIGHT) / 2);
             canvas.position(canvasPaddingX, canvasPaddingY);
