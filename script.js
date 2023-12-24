@@ -4,7 +4,11 @@ const MIN_PADDING = 8;
 const DEFAULT_TIME = 30;
 const DEFAULT_GRID_SIZE = 5;
 // using a^x where a is 1.1, 1.25, 1.45, 1.52 for easy, normal, hard, nightmare respectively and x is time threshold
-const DIFFICULTY = [1.1, 1.2, 1.3, 1.25, 1.55, 2, 1.45, 2.1, 3, 1.52, 2.3, 3.5];
+const DIFFICULTYS = [1.1, 1.2, 1.3, 1.25, 1.55, 2, 1.45, 2.1, 3, 1.52, 2.3, 3.5];
+const RECORDS = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
+                 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
+                 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
+                 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]];
 
 const SCOREBOARD_WIDTH = 100;
 const SCOREBOARD_X = WIDTH - SCOREBOARD_WIDTH / 2;
@@ -32,12 +36,13 @@ let firstGame = true;
 let i;
 
 // gameplay variables
+let diffString = 'Normal';
+let gmString = 'Classic'
 let boxSize = HEIGHT / DEFAULT_GRID_SIZE;
 let gridSize = DEFAULT_GRID_SIZE;
 let maxTime = DEFAULT_TIME;
 let time = DEFAULT_TIME;
 let score = 0;
-let highScore = 0;
 let combo = 0;
 let maxCombo = 0;
 let decayBar = 0;
@@ -54,8 +59,11 @@ let startButton;
 let restartButton;
 let menuButton;
 let backButton;
+let recordsBackButton;
 let historyButton;
+let recordsButton;
 let isInMenu = false;
+let isInRecords = false;
 // selects
 let gamemodesSelect;
 let difficultySelect;
@@ -85,6 +93,8 @@ function setup() {
     restartButton = createButton('Restart');
     menuButton = createButton('Menu');
     backButton = createButton('Back');
+    recordsButton = createButton('Records');
+    recordsBackButton = createButton('Back');
     gamemodesSelect = createSelect();
     difficultySelect = createSelect();
     showLinesCheck = createCheckbox();
@@ -100,6 +110,8 @@ function setup() {
     restartButton.size(90, BUTTON_HEIGHT);
     menuButton.size(60, BUTTON_HEIGHT);
     backButton.size(60, BUTTON_HEIGHT);
+    recordsBackButton.size(60, BUTTON_HEIGHT);
+    recordsButton.size(80, BUTTON_HEIGHT);
     gridSizeSlider.size(SLIDER_LENGTH);
     preBoxSlider.size(SLIDER_LENGTH);
     preBoxWeightSlider.size(SLIDER_LENGTH);
@@ -112,13 +124,15 @@ function setup() {
     startButton.mouseClicked(initGame);
     menuButton.mouseClicked(menuChoose);
     backButton.mouseClicked(backGame);
+    recordsButton.mouseClicked(openRecordMenu);
+    recordsBackButton.mouseClicked(backGameRecords);
 
     // gamemodes radio
-    gamemodesSelect.option('Classic', 1);
-    gamemodesSelect.option('Streamy', 2);
-    gamemodesSelect.option('Jumpy', 3);
-    gamemodesSelect.option('Mixed', 4);
-    gamemodesSelect.selected(1);
+    gamemodesSelect.option('Classic', 0);
+    gamemodesSelect.option('Streamy', 1);
+    gamemodesSelect.option('Jumpy', 2);
+    gamemodesSelect.option('Mixed', 3);
+    gamemodesSelect.selected(0);
     // diffculty radio
     difficultySelect.option('Easy', 0);
     difficultySelect.option('Normal', 1);
@@ -140,6 +154,7 @@ function setup() {
 
     // hide positions
     hideMenuGui();
+    recordsBackButton.position(-WIDTH, -HEIGHT);
     // attribute('disabled', '');
     // removeAttribute('disabled');
 }
@@ -170,11 +185,11 @@ function drawHealthBar() {
         decayBar = MIN_DECAYBAR;
     } else if (startGame) {
         if (time < maxTime / 3) {
-            decayBar += DIFFICULTY[difficultySelect.value() * 3 + 2];
+            decayBar += DIFFICULTYS[difficultySelect.value() * 3 + 2];
         } else if (time >= maxTime / 3 && time < maxTime / 3 * 2) {
-            decayBar += DIFFICULTY[difficultySelect.value() * 3 + 1];
+            decayBar += DIFFICULTYS[difficultySelect.value() * 3 + 1];
         } else {
-            decayBar += DIFFICULTY[difficultySelect.value() * 3];
+            decayBar += DIFFICULTYS[difficultySelect.value() * 3];
         }
     }
     // decay bar
@@ -191,7 +206,7 @@ function drawBoxes() {
 }
 
 function drawPreBoxLines() {
-    if (!showLinesCheck.checked()) {
+    if (!showLinesCheck.checked() || preBoxes.length == 0) {
         return;
     }
     for (i = preBoxes.length - 1; i > 0; i--) {
@@ -204,9 +219,6 @@ function drawPreBoxLines() {
 }
 
 function drawScoreBoard() {
-    if (score > highScore) {
-        highScore = score;
-    }
     if (combo > maxCombo) {
         maxCombo = combo;
     }
@@ -219,8 +231,8 @@ function drawScoreBoard() {
     stroke('black');
     strokeWeight(1);
     fill('black');
-    text("Highscore:", SCOREBOARD_X, SCOREBOARD_TEXTSIZE);
-    text(highScore, SCOREBOARD_X, SCOREBOARD_TEXTSIZE * 2);
+    text(gmString, SCOREBOARD_X, SCOREBOARD_TEXTSIZE);
+    text(diffString, SCOREBOARD_X, SCOREBOARD_TEXTSIZE * 2);
     text("Score:", SCOREBOARD_X, SCOREBOARD_TEXTSIZE * 3);
     text(score, SCOREBOARD_X, SCOREBOARD_TEXTSIZE * 4);
     text("Time:", SCOREBOARD_X, SCOREBOARD_TEXTSIZE * 5);
@@ -234,15 +246,17 @@ function drawScoreBoard() {
 }
 
 function drawTimer() {
-    if (time == 0) {
-        startGame = false;
-    } else if (frameCount % 60 == 0) {
-        time--;
+    if (startGame) {
+        if (time == 0) {
+            endGameplay();
+        } else if (frameCount % 60 == 0) {
+            time--;
+        }
     }
 
     // for mixed gamemode
-    if (gamemodesSelect.value() == 4 && frameCount % MIXED_INTERVAL == 0) {
-        mixedRandMode = floor(random(1, 4));
+    if (gamemodesSelect.value() == 3 && frameCount % MIXED_INTERVAL == 0) {
+        mixedRandMode = floor(random(0, 3));
     }
     // changes color of countdown timer to red when less than 5 sec
     if (time > 5) {
@@ -281,6 +295,9 @@ function drawCursor() {
     stroke(cursorColorPick.color());
     strokeWeight(5);
     line(mouseX, mouseY, pmouseX, pmouseY);
+}
+function updateRecordsPositions() {
+    recordsBackButton.position(canvasPaddingX, canvasPaddingY);
 }
 
 function updateMenuPositions() {
@@ -326,6 +343,7 @@ function updateMenuPositions() {
 
 function hideMenuGui() {
     restartButton.position(-WIDTH, -HEIGHT);
+    recordsButton.position(-WIDTH, -HEIGHT);
     backButton.position(-WIDTH, -HEIGHT);
     gridSizeSlider.position(-WIDTH, -HEIGHT);
     preBoxSlider.position(-WIDTH, -HEIGHT);
@@ -389,18 +407,25 @@ function draw() {
         drawCursor();
     } else {
         cursor();
+        if (isInRecords) {
+            updateRecordsPositions();
+            return;
+        }
         if (isInMenu) {
             updateMenuPositions();
             return;
         }
+        
         menuButton.position(canvasPaddingX, canvasPaddingY);
 
         if (firstGame) {
             startButton.position(canvasPaddingX + WIDTH / 2 - 40, canvasPaddingY + HEIGHT / 2 - BUTTON_HEIGHT / 2);
+            recordsButton.position(canvasPaddingX + WIDTH - 80, canvasPaddingY);
         } else {
             drawScoreBoard();
             drawHealthBar();
             restartButton.position(canvasPaddingX + WIDTH / 2 - 90, canvasPaddingY + HEIGHT / 2 - BUTTON_HEIGHT / 2);
+            recordsButton.position(canvasPaddingX + WIDTH - SCOREBOARD_WIDTH - 80, canvasPaddingY);
         }
     }
 }
@@ -413,6 +438,7 @@ function initGame() {
     decayBar = 0;
     combo = 0;
     score = 0;
+    maxCombo = 0;
     // reset colors
     preBoxesColorCycle = preBoxes.length - 1;
     for (i = preBoxes.length - 1; i >= 0; i--) {
@@ -423,6 +449,7 @@ function initGame() {
     startButton.position(-WIDTH, -HEIGHT);
     restartButton.position(-WIDTH, -HEIGHT);
     menuButton.position(-WIDTH, -HEIGHT);
+    recordsButton.position(-WIDTH, -HEIGHT);
 
     // initial box positions
     randAllBoxes();
@@ -431,8 +458,7 @@ function initGame() {
 function gameplay() {
     if (!isOnMouse(currentBox.x, currentBox.y)) { // miss
         if (difficultySelect.value() == 3) { // nightmare mode
-            startGame = false;
-            time = 0;
+            endGameplay();
             return;
         }
         // broken combo
@@ -453,11 +479,11 @@ function gameplay() {
         }
 
         // sets last pre-box to another location depending on gamemode
-        if (gamemodesSelect.value() == 1 || (gamemodesSelect.value() == 4 && mixedRandMode == 1)) {
+        if (gamemodesSelect.value() == 0 || (gamemodesSelect.value() == 3 && mixedRandMode == 0)) {
             preBoxes[preBoxes.length - 1].setPos(genRandGridVal(), genRandGridVal());
-        } else if (gamemodesSelect.value() == 2 || (gamemodesSelect.value() == 4 && mixedRandMode == 2)) {
+        } else if (gamemodesSelect.value() == 1 || (gamemodesSelect.value() == 3 && mixedRandMode == 1)) {
             streamy();
-        } else if (gamemodesSelect.value() == 3 || (gamemodesSelect.value() == 4 && mixedRandMode == 3)) {
+        } else if (gamemodesSelect.value() == 2 || (gamemodesSelect.value() == 3 && mixedRandMode == 2)) {
             jumpy();
         }
         preBoxesColorCycle = (preBoxesColorCycle + 1) % preBoxes.length;
@@ -471,6 +497,20 @@ function gameplay() {
         decayBar -= HEALTH_GAIN;
     } else { // avoid overfill
         decayBar -= decayBar;
+    }
+}
+
+function endGameplay() {
+    startGame = false;
+    time = 0;
+    // update records
+    const recordScore = RECORDS[gamemodesSelect.value()][difficultySelect.value() * 5];
+    if (score > recordScore) {
+        RECORDS[gamemodesSelect.value()][difficultySelect.value() * 5] = score;
+        RECORDS[gamemodesSelect.value()][difficultySelect.value() * 5 + 1] = maxCombo;
+        RECORDS[gamemodesSelect.value()][difficultySelect.value() * 5 + 2] = gridSize;
+        RECORDS[gamemodesSelect.value()][difficultySelect.value() * 5 + 3] = maxTime;
+        RECORDS[gamemodesSelect.value()][difficultySelect.value() * 5 + 4] = preBoxes.length;
     }
 }
 
@@ -526,8 +566,7 @@ function keyPressed() {
     }
 
     if (keyCode == ESCAPE) {
-        startGame = false;
-        time = 0;
+        endGameplay();
         return;
     }
     gameplay();
@@ -547,6 +586,7 @@ function menuChoose() {
     startButton.position(-WIDTH, -HEIGHT);
     restartButton.position(-WIDTH, -HEIGHT);
     menuButton.position(-WIDTH, -HEIGHT);
+    recordsButton.position(-WIDTH, -HEIGHT);
     updateMenuPositions();
 }
 // when back button is clicked
@@ -554,7 +594,6 @@ function backGame() {
     isInMenu = false;
     menuButton.position(canvasPaddingX, canvasPaddingY);
     hideMenuGui();
-
     for (i = 0; i < preBoxColors.length; i++) {
         preBoxColorPicks[i].position(-WIDTH, -HEIGHT);
         preBoxColors[i] = preBoxColorPicks[i].color();
@@ -571,6 +610,39 @@ function backGame() {
     }
     // set time
     maxTime = timeSlider.value();
+    // strings
+    if (gamemodesSelect.value() == 0) {
+        gmString = 'Classic';
+    } else if (gamemodesSelect.value() == 1) {
+        gmString = 'Streamy';
+    } else if (gamemodesSelect.value() == 2) {
+        gmString = 'Jumpy';
+    } else {
+        gmString = 'Mixed';
+    }
+
+    if (difficultySelect.value() == 0) {
+        diffString = 'Easy';
+    } else if (difficultySelect.value() == 1) {
+        diffString = 'Normal';
+    } else if (difficultySelect.value() == 2) {
+        diffString = 'Hard';
+    } else {
+        diffString = 'Nightmare';
+    }
+}
+function backGameRecords() {
+    isInRecords = false;
+    recordsBackButton.position(-WIDTH, -HEIGHT);
+
+    const tabrecord = document.getElementById("recordstab");
+    tabrecord.style.top = -WIDTH;
+    tabrecord.style.left = -HEIGHT;
+    tabrecord.style.display = 'none';
+    const tabcontent = document.getElementsByClassName("tabcontent");
+    for (i = 0; i < tabcontent.length; i++) {
+      tabcontent[i].style.display = "none";
+    }
 }
 
 // allow dynamic canvas resizing
@@ -579,3 +651,61 @@ window.onresize = function() {
     canvasPaddingY = max(MIN_PADDING, (window.innerHeight - HEIGHT) / 2);
     canvas.position(canvasPaddingX, canvasPaddingY);
 }
+
+// record tabs
+function openRecordMenu() {
+    isInRecords = true;
+    startButton.position(-WIDTH, -HEIGHT);
+    restartButton.position(-WIDTH, -HEIGHT);
+    menuButton.position(-WIDTH, -HEIGHT);
+    recordsButton.position(-WIDTH, -HEIGHT);
+
+    const tabrecord = document.getElementById("recordstab");
+    tabrecord.style.display = 'block';
+    tabrecord.style.top = canvasPaddingY;
+    tabrecord.style.left = canvasPaddingX + 60;
+    const tabcontent = document.getElementsByClassName("tabcontent");
+    for (i = 0; i < tabcontent.length; i++) {
+        tabcontent[i].style.left = canvasPaddingX + 60;
+        tabcontent[i].style.top = canvasPaddingY + 60;
+    }
+    // default tab open
+    document.getElementById('defaultOpen').click();
+}
+
+function openRecord(evt, recordGamemode) {
+    
+    // Get all elements with class="tabcontent" and hide them
+    const tabcontent = document.getElementsByClassName("tabcontent");
+    for (i = 0; i < tabcontent.length; i++) {
+      tabcontent[i].style.display = "none";
+    }
+  
+    // Get all elements with class="tablinks" and remove the class "active"
+    const tablinks = document.getElementsByClassName("tablinks");
+    for (i = 0; i < tablinks.length; i++) {
+      tablinks[i].className = tablinks[i].className.replace(" active", "");
+    }
+  
+    // Show the current tab, and add an "active" class to the button that opened the tab
+    document.getElementById(recordGamemode).style.display = "block";
+    evt.currentTarget.className += " active";
+
+    let gm = 0;
+    if (recordGamemode == 'streamy') {
+        gm = 1;
+    } else if (recordGamemode == 'jumpy') {
+        gm = 2;
+    } else if (recordGamemode == 'mixed') {
+        gm = 3;
+    }
+    // Show records
+    const diff = ['easy', 'normal', 'hard', 'nightmare'];
+    for (i = 0; i < 4; i ++) {
+        document.getElementById(recordGamemode + '_' + diff[i] + '_score').innerHTML = ('Highscore: ' + RECORDS[gm][i * 5]);
+        document.getElementById(recordGamemode + '_' + diff[i] + '_combo').innerHTML = ('Combo: ' + RECORDS[gm][i * 5 + 1]);
+        document.getElementById(recordGamemode + '_' + diff[i] + '_mod').innerHTML = ('Modifier: ' + RECORDS[gm][i * 5 + 2] 
+                                                                                             + '-' + RECORDS[gm][i * 5 + 3] 
+                                                                                             + '-' + RECORDS[gm][i * 5 + 4]);
+    }
+  }
