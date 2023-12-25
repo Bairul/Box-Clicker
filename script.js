@@ -693,12 +693,19 @@ function openRecordMenu() {
 
 function exportRecords() {
     console.log("export");
+    let str = '';
+    for (let j = 0; j < RECORDS.length; j++) {
+        for (i = 0; i < RECORDS[j].length; i++) {
+            str += RECORDS[j][i] + '-';
+        }
+    }
+    console.log(str.substring(0, str.length - 1));
 }
 
 function importRecords() {
     console.log("import");
 }
-
+// https://www.w3schools.com/howto/howto_js_popup.asp
 function openRecord(evt, recordGamemode) {
     
     // Get all elements with class="tabcontent" and hide them
