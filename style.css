@@ -1,8 +1,8 @@
 /* Style the tab */
 .tab {
     overflow: hidden;
-    border: 1px solid #ccc;
-    background-color: #f1f1f1;
+    border: none;
+    background-color: #ccc;
     position: absolute;
     top: 0;
     left: 0;
@@ -18,8 +18,12 @@
     outline: none;
     cursor: pointer;
     padding: 14px 16px;
+    padding-bottom: 20px;
+    padding-top: 20px;
     transition: 0.3s;
-    font-size: 17px;
+    font-family: serif;
+    font-size: 21px;
+    font-weight: bold;
 }
 
 /* Change background color of buttons on hover */
@@ -29,11 +33,12 @@
 
 /* Create an active/current tablink class */
 .tab button.active {
-    background-color: #ccc;
+    background-color: #ffffff;
 }
 
 /* Style the tab content */
 .tabcontent {
+    background-color: #ffffff;
     display: none;
     padding: 6px 12px;
     border: none;
@@ -41,10 +46,42 @@
     top: 0;
     left: 0;
     z-index: 10;
+    box-shadow: 5px 10px #888888;
+}
+
+/* Fade in tabs */
+@-webkit-keyframes fadeEffect {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes fadeEffect {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+#top-left {
+    padding-bottom: 100px;
+}
+
+#top-right {
+    padding-bottom: 100px;
 }
 
 td {
-    padding-right: 150px;
-    padding-top: 20px;
-    padding-bottom: 100px;
+    padding-bottom: 10px;
+    padding-bottom: 30px;
+    padding-right: 120px;
+    -webkit-animation: fadeEffect 1s;
+    animation: fadeEffect 1s;
 }

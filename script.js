@@ -60,7 +60,8 @@ let restartButton;
 let menuButton;
 let backButton;
 let recordsBackButton;
-let historyButton;
+let importRecordsButton;
+let exportRecordsButton;
 let recordsButton;
 let isInMenu = false;
 let isInRecords = false;
@@ -95,6 +96,8 @@ function setup() {
     backButton = createButton('Back');
     recordsButton = createButton('Records');
     recordsBackButton = createButton('Back');
+    importRecordsButton = createButton('Import');
+    exportRecordsButton = createButton('Export');
     gamemodesSelect = createSelect();
     difficultySelect = createSelect();
     showLinesCheck = createCheckbox();
@@ -105,19 +108,20 @@ function setup() {
     preBoxWeightSlider = createSlider(4, 12, DEFAULT_WEIGHT, 2);
     timeSlider = createSlider(10, DEFAULT_TIME * 2, DEFAULT_TIME, 5);
 
-    // set button size and position
+    // set button size
     startButton.size(80, BUTTON_HEIGHT);
     restartButton.size(90, BUTTON_HEIGHT);
     menuButton.size(60, BUTTON_HEIGHT);
     backButton.size(60, BUTTON_HEIGHT);
     recordsBackButton.size(60, BUTTON_HEIGHT);
     recordsButton.size(80, BUTTON_HEIGHT);
+    importRecordsButton.size(60, BUTTON_HEIGHT);
+    exportRecordsButton.size(60, BUTTON_HEIGHT);
+
     gridSizeSlider.size(SLIDER_LENGTH);
     preBoxSlider.size(SLIDER_LENGTH);
     preBoxWeightSlider.size(SLIDER_LENGTH);
     timeSlider.size(SLIDER_LENGTH);
-
-    menuButton.position(canvasPaddingX, canvasPaddingY);
 
     // button functions
     restartButton.mouseClicked(initGame);
@@ -126,6 +130,8 @@ function setup() {
     backButton.mouseClicked(backGame);
     recordsButton.mouseClicked(openRecordMenu);
     recordsBackButton.mouseClicked(backGameRecords);
+    importRecordsButton.mouseClicked(importRecords);
+    exportRecordsButton.mouseClicked(exportRecords);
 
     // gamemodes radio
     gamemodesSelect.option('Classic', 0);
@@ -152,11 +158,10 @@ function setup() {
         preBoxColorPicks[i].size(COLOR_PICK_SIZE, COLOR_PICK_SIZE);
     }
 
+    menuButton.position(canvasPaddingX, canvasPaddingY);
     // hide positions
     hideMenuGui();
-    recordsBackButton.position(-WIDTH, -HEIGHT);
-    // attribute('disabled', '');
-    // removeAttribute('disabled');
+    hideRecordsGui();
 }
 
 function drawHealthBar() {
@@ -231,8 +236,12 @@ function drawScoreBoard() {
     stroke('black');
     strokeWeight(1);
     fill('black');
-    text(gmString, SCOREBOARD_X, SCOREBOARD_TEXTSIZE);
+    textSize(SCOREBOARD_TEXTSIZE * 1.2);
+    text(gmString, SCOREBOARD_X, SCOREBOARD_TEXTSIZE + 2);
+    textSize(SCOREBOARD_TEXTSIZE / 3 * 2);
     text(diffString, SCOREBOARD_X, SCOREBOARD_TEXTSIZE * 2);
+
+    textSize(SCOREBOARD_TEXTSIZE);
     text("Score:", SCOREBOARD_X, SCOREBOARD_TEXTSIZE * 3);
     text(score, SCOREBOARD_X, SCOREBOARD_TEXTSIZE * 4);
     text("Time:", SCOREBOARD_X, SCOREBOARD_TEXTSIZE * 5);
@@ -298,6 +307,17 @@ function drawCursor() {
 }
 function updateRecordsPositions() {
     recordsBackButton.position(canvasPaddingX, canvasPaddingY);
+    exportRecordsButton.position(canvasPaddingX, canvasPaddingY + HEIGHT - BUTTON_HEIGHT);
+    importRecordsButton.position(canvasPaddingX, canvasPaddingY + HEIGHT - BUTTON_HEIGHT * 2);
+
+    const tabrecord = document.getElementById("recordstab");
+    tabrecord.style.top = canvasPaddingY + 5;
+    tabrecord.style.left = canvasPaddingX + 65;
+    const tabcontent = document.getElementsByClassName("tabcontent");
+    for (i = 0; i < tabcontent.length; i++) {
+        tabcontent[i].style.left = canvasPaddingX + 65;
+        tabcontent[i].style.top = canvasPaddingY + 65;
+    }
 }
 
 function updateMenuPositions() {
@@ -355,6 +375,12 @@ function hideMenuGui() {
     showTransCheck.position(-WIDTH, -HEIGHT);
     mouseCheck.position(-WIDTH, -HEIGHT);
     cursorColorPick.position(-WIDTH, -HEIGHT);
+}
+
+function hideRecordsGui() {
+    recordsBackButton.position(-WIDTH, -HEIGHT);
+    exportRecordsButton.position(-WIDTH, -HEIGHT);
+    importRecordsButton.position(-WIDTH, -HEIGHT);
 }
 
 // objects
@@ -633,7 +659,7 @@ function backGame() {
 }
 function backGameRecords() {
     isInRecords = false;
-    recordsBackButton.position(-WIDTH, -HEIGHT);
+    hideRecordsGui();
 
     const tabrecord = document.getElementById("recordstab");
     tabrecord.style.top = -WIDTH;
@@ -660,17 +686,17 @@ function openRecordMenu() {
     menuButton.position(-WIDTH, -HEIGHT);
     recordsButton.position(-WIDTH, -HEIGHT);
 
-    const tabrecord = document.getElementById("recordstab");
-    tabrecord.style.display = 'block';
-    tabrecord.style.top = canvasPaddingY;
-    tabrecord.style.left = canvasPaddingX + 60;
-    const tabcontent = document.getElementsByClassName("tabcontent");
-    for (i = 0; i < tabcontent.length; i++) {
-        tabcontent[i].style.left = canvasPaddingX + 60;
-        tabcontent[i].style.top = canvasPaddingY + 60;
-    }
+    document.getElementById("recordstab").style.display = 'block';
     // default tab open
     document.getElementById('defaultOpen').click();
+}
+
+function exportRecords() {
+    console.log("export");
+}
+
+function importRecords() {
+    console.log("import");
 }
 
 function openRecord(evt, recordGamemode) {
