@@ -48,9 +48,24 @@ function backGameRecords() {
     }
 }
 
+// ========= EXPORTING =========
 function exportRecords() {
     console.log("export");
     document.getElementById("myModal").style.display = "block";
+}
+
+function downloadTextFile(data) {
+    const a = document.createElement('a');
+    const b = new Blob([data], { type: "text/plain" });
+    const url = window.URL.createObjectURL(b);
+    a.href = url;
+    a.download = 'Box-Clicker-records.txt';
+    a.style.display = "none";
+    document.body.append(a);
+
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url);
 }
 
 // When the user clicks on <span> (x), close the modal
@@ -71,16 +86,36 @@ document.getElementById("confirmExport").onclick = function () {
     if (name == '') {
         console.log("name cannot be empty");
     } else {
-        console.log(name)
         let str = '';
         for (let j = 0; j < RECORDS.length; j++) {
             for (i = 0; i < RECORDS[j].length; i++) {
                 str += RECORDS[j][i] + '-';
             }
         }
-        str.substring(0, str.length - 1);
+        // downloadTextFile(str.substring(0, str.length - 1));
+        call(name, str.substring(0, str.length - 1));
     }
 }
+
+const urlApi = "https://zonk83g0gi.execute-api.us-east-2.amazonaws.com/kmac_enc";
+
+async function call(name, datatext) {
+    const response = await fetch(urlApi, {
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ "name": name, "data": datatext })
+    });
+
+    response.json().then(data => {
+        downloadTextFile(data.cryptogram);
+    });
+}
+
+
+// ========= IMPORTING =========
 
 function importRecords() {
     console.log("import");
@@ -116,9 +151,9 @@ function openRecord(evt, recordGamemode) {
     const diff = ['easy', 'normal', 'hard', 'nightmare'];
     for (i = 0; i < 4; i++) {
         document.getElementById(recordGamemode + '_' + diff[i] + '_score').innerHTML = ('Highscore: ' + RECORDS[gm][i * 5]);
-        document.getElementById(recordGamemode + '_' + diff[i] + '_combo').innerHTML = ('Combo: '     + RECORDS[gm][i * 5 + 1]);
-        document.getElementById(recordGamemode + '_' + diff[i] + '_mod').innerHTML = ('Modifier: '    + RECORDS[gm][i * 5 + 2]
-                                                                                                + '-' + RECORDS[gm][i * 5 + 3]
-                                                                                                + '-' + RECORDS[gm][i * 5 + 4]);
+        document.getElementById(recordGamemode + '_' + diff[i] + '_combo').innerHTML = ('Combo: ' + RECORDS[gm][i * 5 + 1]);
+        document.getElementById(recordGamemode + '_' + diff[i] + '_mod').innerHTML = ('Modifier: ' + RECORDS[gm][i * 5 + 2]
+            + '-' + RECORDS[gm][i * 5 + 3]
+            + '-' + RECORDS[gm][i * 5 + 4]);
     }
 }
