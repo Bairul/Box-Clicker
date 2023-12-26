@@ -46,7 +46,7 @@
     top: 0;
     left: 0;
     z-index: 2;
-    box-shadow: 5px 10px #888888;
+    box-shadow: 5px 10px 5px #888888;
 }
 
 /* Fade in tabs */
@@ -105,6 +105,7 @@ td {
     background-color: #fefefe;
     margin: auto;
     padding: 20px;
+    padding-bottom: 5px;
     border: 1px solid #888;
     width: 40%;
 }
@@ -122,4 +123,26 @@ td {
     color: #000;
     text-decoration: none;
     cursor: pointer;
+}
+
+@keyframes shake {
+    0% {
+        margin-left: 0rem;
+    }
+
+    25% {
+        margin-left: 0.3rem;
+    }
+
+    75% {
+        margin-left: -0.3rem;
+    }
+
+    100% {
+        margin-left: 0rem;
+    }
+}
+
+.error {
+    animation: shake 0.2s ease-in-out 0s 2;
 }

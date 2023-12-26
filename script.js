@@ -80,8 +80,8 @@ let mouseCheck;
 // colors
 let cursorColorPick;
 let preBoxColorPicks = [];
-// Get the modal
-let modal = document.getElementById("myModal");
+// modals
+let exportModal = document.getElementById("exportPopup");
 
 function setup() {
     canvasPaddingX = max(MIN_PADDING, (window.innerWidth - WIDTH) / 2);

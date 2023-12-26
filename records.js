@@ -24,8 +24,8 @@ function updateRecordsPositions() {
         tabcontent[i].style.left = canvasPaddingX + 65;
         tabcontent[i].style.top = canvasPaddingY + 65;
     }
-    modal.style.top = canvasPaddingY;
-    modal.style.left = canvasPaddingX;
+    exportModal.style.top = canvasPaddingY;
+    exportModal.style.left = canvasPaddingX;
 }
 
 function hideRecordsGui() {
@@ -51,7 +51,7 @@ function backGameRecords() {
 // ========= EXPORTING =========
 function exportRecords() {
     console.log("export");
-    document.getElementById("myModal").style.display = "block";
+    document.getElementById("exportPopup").style.display = "block";
 }
 
 function downloadTextFile(data) {
@@ -70,22 +70,27 @@ function downloadTextFile(data) {
 
 // When the user clicks on <span> (x), close the modal
 document.getElementsByClassName("close")[0].onclick = function () {
-    modal.style.display = "none";
+    exportModal.style.display = "none";
 }
 
 // When the user clicks anywhere outside of the modal, close it
 window.onclick = function (event) {
-    if (event.target == modal) {
-        modal.style.display = "none";
+    if (event.target == exportModal) {
+        exportModal.style.display = "none";
     }
 }
 
 document.getElementById("confirmExport").onclick = function () {
-    modal.style.display = "none";
-    let name = document.getElementById("name").value;
-    if (name == '') {
-        console.log("name cannot be empty");
+    const name = document.getElementById("name");
+    if (name.value == '') {
+        // add shaking
+        name.classList.add('error');
+        // remove shaking after done
+        setTimeout(function () {
+            name.classList.remove('error');
+        }, 300);
     } else {
+        exportModal.style.display = "none";
         let str = '';
         for (let j = 0; j < RECORDS.length; j++) {
             for (i = 0; i < RECORDS[j].length; i++) {
@@ -93,7 +98,7 @@ document.getElementById("confirmExport").onclick = function () {
             }
         }
         // downloadTextFile(str.substring(0, str.length - 1));
-        call(name, str.substring(0, str.length - 1));
+        call(name.value, str.substring(0, str.length - 1));
     }
 }
 
