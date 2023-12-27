@@ -23,3 +23,6 @@ Game is on [github pages](https://bairul.github.io/Box-Clicker/)
     * Mix: randomly switch between the 3 gamemodes above
 
 6. Press **ESC** key to quit current game
+
+7. You can export your record history by entering your name
+    * The ***same*** name must be used again to import that record history
