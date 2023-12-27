@@ -54,10 +54,10 @@ function hideModal() {
     portModal.style.display = "none";
     importContent.style.display = "none";
     exportContent.style.display = "none";
+    document.getElementById("unsuccess-import").style.display = 'none';
 }
 // ========= EXPORTING =========
 function exportRecords() {
-    console.log("export");
     portModal.style.display = "block";
     exportContent.style.display = "block";
 }
@@ -152,7 +152,6 @@ function parseRecordsString(str) {
 }
 
 function importRecords() {
-    console.log("import");
     portModal.style.display = "block";
     importContent.style.display = "block";
 }
@@ -169,7 +168,6 @@ document.getElementById("confirmImport").onclick = function () {
     } else {
         // parseRecordsString(cryptogram); // when not using api call
         callKmacDec(name.value, cryptogram);
-        hideModal();
     }
 }
 
@@ -189,8 +187,11 @@ async function callKmacDec(name, data) {
         if (datajson.accept == 1) {
             console.log("accept");
             parseRecordsString(datajson.decipheredText);
+            hideModal();
         } else {
             console.log("reject");
+            importContent.style.display = "none";
+            document.getElementById("unsuccess-import").style.display = 'block';
         }
     });
 }

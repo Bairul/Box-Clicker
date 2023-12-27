@@ -73,7 +73,7 @@ td {
     padding-bottom: 10px;
     padding-bottom: 30px;
     padding-right: 120px;
-    animation: fadeEffect 1s;
+    animation: fadeEffect 0.75s;
 }
 
 /* The Modal (background) */
@@ -115,6 +115,10 @@ td {
 }
 
 #export-div {
+    display: none;
+}
+
+#unsuccess-import {
     display: none;
 }
 
