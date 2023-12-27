@@ -38,26 +38,6 @@ function drawHealthBar() {
     rectMode(CENTER);
 }
 
-function drawBoxes() {
-    currentBox.display();
-    for (i = preBoxes.length - 1; i >= 0; i--) {
-        preBoxes[i].display(preBoxWeightSlider.value(), 255 / (showTransCheck.checked() ? (i + 1) : 1));
-    }
-}
-
-function drawPreBoxLines() {
-    if (!showLinesCheck.checked() || preBoxes.length == 0) {
-        return;
-    }
-    for (i = preBoxes.length - 1; i > 0; i--) {
-        stroke(preBoxes[i].c);
-        strokeWeight(preBoxWeightSlider.value());
-        line(preBoxes[i - 1].x, preBoxes[i - 1].y, preBoxes[i].x, preBoxes[i].y);
-    }
-    stroke(preBoxes[0].c);
-    line(currentBox.x, currentBox.y, preBoxes[0].x, preBoxes[0].y);
-}
-
 function drawScoreBoard() {
     if (combo > maxCombo) {
         maxCombo = combo;
@@ -141,6 +121,24 @@ function drawCursor() {
     line(mouseX, mouseY, pmouseX, pmouseY);
 }
 
+function drawPreBoxes() {
+    for (i = preBoxes.length - 1; i >= 0; i--) {
+        preBoxes[i].display(preBoxWeightSlider.value(), 255 / (showTransCheck.checked() ? (i + 1) : 1));
+    }
+}
+
+function drawPreBoxLines() {
+    if (!showLinesCheck.checked() || preBoxes.length == 0) {
+        return;
+    }
+    for (i = preBoxes.length - 1; i > 0; i--) {
+        stroke(red(preBoxes[i].c), green(preBoxes[i].c), blue(preBoxes[i].c), 255 / (showTransCheck.checked() ? (i + 1) : 1));
+        strokeWeight(preBoxWeightSlider.value());
+        line(preBoxes[i - 1].x, preBoxes[i - 1].y, preBoxes[i].x, preBoxes[i].y);
+    }
+    stroke(preBoxes[0].c);
+    line(currentBox.x, currentBox.y, preBoxes[0].x, preBoxes[0].y);
+}
 
 // objects
 function BOX(initX, initY, color) {
@@ -169,7 +167,7 @@ function PRE_BOX(initX, initY, color) {
         noFill();
         stroke(red(this.c), green(this.c), blue(this.c), transparency);
         strokeWeight(weight);
-        rect(this.x + weight / 4, this.y + weight / 4, boxSize - weight / 2, boxSize - weight / 2);
+        rect(this.x, this.y, boxSize - weight, boxSize - weight);
     }
 
     this.setPos = function(newX, newY) {
@@ -177,7 +175,7 @@ function PRE_BOX(initX, initY, color) {
         this.y = newY;
     }
 }
-
+let transparency = 0;
 // gameloop
 function draw() {
     background(175, 200, 255);
@@ -186,8 +184,11 @@ function draw() {
         drawGrid();
         drawScoreBoard();
         drawHealthBar();
-        drawBoxes();
-        drawPreBoxLines();
+        currentBox.display();
+        if (preBoxSlider.value() != 0) {
+            drawPreBoxes();
+            drawPreBoxLines();
+        }
         drawCursor();
     } else {
         cursor();
@@ -252,27 +253,23 @@ function gameplay() {
     }
 
     // sets current to the first pre-box
-    if (preBoxes.length == 0) {
-        currentBox.setPos(genRandGridVal(), genRandGridVal());
-    } else {
-        currentBox.setPos(preBoxes[0].x, preBoxes[0].y);
-        // sets the previous pre-box to the next one
-        for (i = 1; i < preBoxes.length; i++) {
-            preBoxes[i - 1].setPos(preBoxes[i].x, preBoxes[i].y);
-            preBoxes[i - 1].c = preBoxes[i].c;
-        }
-
-        // sets last pre-box to another location depending on gamemode
-        if (gamemodesSelect.value() == 0 || (gamemodesSelect.value() == 3 && mixedRandMode == 0)) {
-            preBoxes[preBoxes.length - 1].setPos(genRandGridVal(), genRandGridVal());
-        } else if (gamemodesSelect.value() == 1 || (gamemodesSelect.value() == 3 && mixedRandMode == 1)) {
-            streamy();
-        } else if (gamemodesSelect.value() == 2 || (gamemodesSelect.value() == 3 && mixedRandMode == 2)) {
-            jumpy();
-        }
-        preBoxesColorCycle = (preBoxesColorCycle + 1) % preBoxes.length;
-        preBoxes[preBoxes.length - 1].c = preBoxColors[preBoxesColorCycle];
+    currentBox.setPos(preBoxes[0].x, preBoxes[0].y);
+    // sets the previous pre-box to the next one
+    for (i = 1; i < preBoxes.length; i++) {
+        preBoxes[i - 1].setPos(preBoxes[i].x, preBoxes[i].y);
+        preBoxes[i - 1].c = preBoxes[i].c;
     }
+
+    // sets last pre-box to another location depending on gamemode
+    if (gamemodesSelect.value() == 0 || (gamemodesSelect.value() == 3 && mixedRandMode == 0)) {
+        preBoxes[preBoxes.length - 1].setPos(genRandGridVal(), genRandGridVal());
+    } else if (gamemodesSelect.value() == 1 || (gamemodesSelect.value() == 3 && mixedRandMode == 1)) {
+        streamy();
+    } else if (gamemodesSelect.value() == 2 || (gamemodesSelect.value() == 3 && mixedRandMode == 2)) {
+        jumpy();
+    }
+    preBoxesColorCycle = (preBoxesColorCycle + 1) % preBoxes.length;
+    preBoxes[preBoxes.length - 1].c = preBoxColors[preBoxesColorCycle];
 
     // combo and points
     combo++;
@@ -294,7 +291,7 @@ function endGameplay() {
         RECORDS[gamemodesSelect.value()][difficultySelect.value() * 5 + 1] = maxCombo;
         RECORDS[gamemodesSelect.value()][difficultySelect.value() * 5 + 2] = gridSize;
         RECORDS[gamemodesSelect.value()][difficultySelect.value() * 5 + 3] = maxTime;
-        RECORDS[gamemodesSelect.value()][difficultySelect.value() * 5 + 4] = preBoxes.length;
+        RECORDS[gamemodesSelect.value()][difficultySelect.value() * 5 + 4] = preBoxSlider.value();
     }
 }
 

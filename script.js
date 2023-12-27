@@ -107,7 +107,7 @@ function setup() {
     mouseCheck = createCheckbox("", true);
     gridSizeSlider = createSlider(4, 8, gridSize, 1);
     preBoxSlider = createSlider(0, preBoxColors.length, 1, 1);
-    preBoxWeightSlider = createSlider(4, 12, DEFAULT_WEIGHT, 2);
+    preBoxWeightSlider = createSlider(4, 16, DEFAULT_WEIGHT, 2);
     timeSlider = createSlider(10, DEFAULT_TIME * 2, DEFAULT_TIME, 5);
 
     // set button size

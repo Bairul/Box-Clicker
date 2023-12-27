@@ -36,7 +36,7 @@ function updateMenuPositions() {
     text("Mouse Click:", MENU_X, MENU_Y + vertPadSlid + vertPad);
     text("Premove: " + preBoxSlider.value(), vomSlidX, MENU_Y);
     text("Show Lines:",     vomSlidX, MENU_Y + vertPad);
-    text("Transparent:",    vomSlidX, MENU_Y + vertPad * 2);
+    text("Show Fade:",    vomSlidX, MENU_Y + vertPad * 2);
     text("Cursor:",         vomSlidX, MENU_Y + vertPad * 3);
     text("Premove Colors:", vomSlidX, MENU_Y + vertPad * 4);
     text("Weight: " + preBoxWeightSlider.value(), vomSlidX, MENU_Y + vertPad * 7);
@@ -81,7 +81,9 @@ function backGame() {
 
     // sets preboxes
     preBoxes.splice(0, preBoxes.length);
-    for (i = 0; i < preBoxSlider.value(); i++) {
+    // there is at least 1 prebox
+    preBoxes.push(new PRE_BOX(0, 0, preBoxColors[0]));
+    for (i = 1; i < preBoxSlider.value(); i++) {
         preBoxes.push(new PRE_BOX(0, 0, preBoxColors[i]));
     }
     // set time
