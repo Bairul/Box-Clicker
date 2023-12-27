@@ -165,9 +165,10 @@ document.getElementById("confirmImport").onclick = function () {
         setTimeout(function () {
             name.classList.remove('error');
         }, 300);
-    } else {
+    } else if (!cryptogram == '') {
         // parseRecordsString(cryptogram); // when not using api call
         callKmacDec(name.value, cryptogram);
+        cryptogram = '';
     }
 }
 
