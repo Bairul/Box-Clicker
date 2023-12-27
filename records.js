@@ -74,6 +74,17 @@ window.onclick = function (event) {
     }
 }
 
+function convertRecordsToString() {
+    let str = '';
+    for (let j = 0; j < RECORDS.length; j++) {
+        for (i = 0; i < RECORDS[j].length; i++) {
+            str += RECORDS[j][i] + '-';
+        }
+    }
+    str = str.substring(0, str.length - 1);
+    return str;
+}
+
 document.getElementById("confirmExport").onclick = function () {
     const name = document.getElementById("exportName");
     if (name.value == '') {
@@ -84,14 +95,8 @@ document.getElementById("confirmExport").onclick = function () {
             name.classList.remove('error');
         }, 300);
     } else {
-        let str = '';
-        for (let j = 0; j < RECORDS.length; j++) {
-            for (i = 0; i < RECORDS[j].length; i++) {
-                str += RECORDS[j][i] + '-';
-            }
-        }
-        // downloadTextFile(str.substring(0, str.length - 1));
-        callKmacEnc(name.value, str.substring(0, str.length - 1));
+        // downloadTextFile(name.value, convertRecordsToString()); // when not using api call
+        callKmacEnc(name.value, convertRecordsToString());
         hideModal();
     }
 }
@@ -131,6 +136,21 @@ async function callKmacEnc(name, data) {
 // ========= IMPORTING =========
 let cryptogram = '';
 
+function parseRecordsString(str) {
+    const arr = str.split('-');
+    if (arr.length != RECORDS.length * RECORDS[0].length) {
+        console.log("Invalid input");
+        return;
+    }
+    let j = -1;
+    for (i = 0; i < arr.length; i++) {
+        if (i % RECORDS[0].length == 0) {
+            j++;
+        }
+        RECORDS[j][i % RECORDS[0].length] = arr[i];
+    }
+}
+
 function importRecords() {
     console.log("import");
     portModal.style.display = "block";
@@ -138,7 +158,7 @@ function importRecords() {
 }
 
 document.getElementById("confirmImport").onclick = function () {
-    const name = document.getElementById("importFile");
+    const name = document.getElementById("importName");
     if (name.value == '') {
         // add shaking
         name.classList.add('error');
@@ -147,7 +167,9 @@ document.getElementById("confirmImport").onclick = function () {
             name.classList.remove('error');
         }, 300);
     } else {
+        // parseRecordsString(cryptogram); // when not using api call
         callKmacDec(name.value, cryptogram);
+        hideModal();
     }
 }
 
@@ -166,6 +188,7 @@ async function callKmacDec(name, data) {
     response.json().then(datajson => {
         if (datajson.accept == 1) {
             console.log("accept");
+            parseRecordsString(datajson.decipheredText);
         } else {
             console.log("reject");
         }
