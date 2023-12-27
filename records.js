@@ -24,8 +24,8 @@ function updateRecordsPositions() {
         tabcontent[i].style.left = canvasPaddingX + 65;
         tabcontent[i].style.top = canvasPaddingY + 65;
     }
-    exportModal.style.top = canvasPaddingY;
-    exportModal.style.left = canvasPaddingX;
+    portModal.style.top = canvasPaddingY;
+    portModal.style.left = canvasPaddingX;
 }
 
 function hideRecordsGui() {
@@ -47,41 +47,35 @@ function backGameRecords() {
         tabcontent[i].style.display = "none";
     }
 }
+const importContent = document.getElementById("importDiv");
+const exportContent = document.getElementById("exportDiv");
 
+function hideModal() {
+    portModal.style.display = "none";
+    importContent.style.display = "none";
+    exportContent.style.display = "none";
+}
 // ========= EXPORTING =========
 function exportRecords() {
     console.log("export");
-    document.getElementById("exportPopup").style.display = "block";
+    portModal.style.display = "block";
+    exportContent.style.display = "block";
 }
 
-function downloadTextFile(data) {
-    const a = document.createElement('a');
-    const b = new Blob([data], { type: "text/plain" });
-    const url = window.URL.createObjectURL(b);
-    a.href = url;
-    a.download = 'Box-Clicker-records.txt';
-    a.style.display = "none";
-    document.body.append(a);
-
-    a.click();
-    a.remove();
-    window.URL.revokeObjectURL(url);
-}
-
-// When the user clicks on <span> (x), close the modal
 document.getElementsByClassName("close")[0].onclick = function () {
-    exportModal.style.display = "none";
+    // When the user clicks on <span> (x), close the modal
+    hideModal();
 }
 
-// When the user clicks anywhere outside of the modal, close it
 window.onclick = function (event) {
-    if (event.target == exportModal) {
-        exportModal.style.display = "none";
+    // When the user clicks anywhere outside of the modal, close it
+    if (event.target == portModal) {
+        hideModal();
     }
 }
 
 document.getElementById("confirmExport").onclick = function () {
-    const name = document.getElementById("name");
+    const name = document.getElementById("exportName");
     if (name.value == '') {
         // add shaking
         name.classList.add('error');
@@ -90,7 +84,6 @@ document.getElementById("confirmExport").onclick = function () {
             name.classList.remove('error');
         }, 300);
     } else {
-        exportModal.style.display = "none";
         let str = '';
         for (let j = 0; j < RECORDS.length; j++) {
             for (i = 0; i < RECORDS[j].length; i++) {
@@ -98,33 +91,98 @@ document.getElementById("confirmExport").onclick = function () {
             }
         }
         // downloadTextFile(str.substring(0, str.length - 1));
-        call(name.value, str.substring(0, str.length - 1));
+        callKmacEnc(name.value, str.substring(0, str.length - 1));
+        hideModal();
     }
 }
 
-const urlApi = "https://zonk83g0gi.execute-api.us-east-2.amazonaws.com/kmac_enc";
+function downloadTextFile(name, data) {
+    const a = document.createElement('a');
+    const b = new Blob([data], { type: "text/plain" });
+    const url = window.URL.createObjectURL(b);
+    a.href = url;
+    a.download = 'Box-Clicker-' + name + '-records.txt';
+    a.style.display = "none";
+    document.body.append(a);
 
-async function call(name, datatext) {
-    const response = await fetch(urlApi, {
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url);
+}
+
+const urlApiEnc = "https://zonk83g0gi.execute-api.us-east-2.amazonaws.com/kmac_enc";
+
+async function callKmacEnc(name, data) {
+    const response = await fetch(urlApiEnc, {
         method: 'POST',
         headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ "name": name, "data": datatext })
+        body: JSON.stringify({ "name": name, "data": data })
     });
 
-    response.json().then(data => {
-        downloadTextFile(data.cryptogram);
+    response.json().then(datajson => {
+        downloadTextFile(name, datajson.cryptogram);
     });
 }
 
 
 // ========= IMPORTING =========
+let cryptogram = '';
 
 function importRecords() {
     console.log("import");
+    portModal.style.display = "block";
+    importContent.style.display = "block";
 }
+
+document.getElementById("confirmImport").onclick = function () {
+    const name = document.getElementById("importFile");
+    if (name.value == '') {
+        // add shaking
+        name.classList.add('error');
+        // remove shaking after done
+        setTimeout(function () {
+            name.classList.remove('error');
+        }, 300);
+    } else {
+        callKmacDec(name.value, cryptogram);
+    }
+}
+
+const urlApiDec = "https://imeqpy3wic.execute-api.us-east-2.amazonaws.com/kmac-dec";
+
+async function callKmacDec(name, data) {
+    const response = await fetch(urlApiDec, {
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ "name": name, "data": data })
+    });
+
+    response.json().then(datajson => {
+        if (datajson.accept == 1) {
+            console.log("accept");
+        } else {
+            console.log("reject");
+        }
+    });
+}
+
+function openFile(input) {
+    let file = input.files[0];
+
+    let reader = new FileReader();
+    reader.readAsText(file);
+    reader.onload = function() {
+        cryptogram = reader.result;
+    }
+}
+
+// ======= end import/export
 
 function openRecord(evt, recordGamemode) {
 

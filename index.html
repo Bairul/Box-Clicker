@@ -141,9 +141,17 @@
         <!-- Modal content -->
         <div class="modal-content">
             <span class="close">&times;</span>
-            <p>Enter your name:</p>
-            <input type="text" id="name" maxlength="32" size="16">
-            <p><input type="submit" id="confirmExport" value="Export"></p>
+            <div id="exportDiv">
+                <p>Enter your name:</p>
+                <input type="text" id="exportName" maxlength="32" size="16">
+                <p><input type="submit" id="confirmExport" value="Export"></p>
+            </div>
+            <div id="importDiv">
+                <p>Enter your name:</p>
+                <input type="text" id="importName" maxlength="32" size="16">
+                <p><input type="file" id="importFile" accept=".txt" onchange="openFile(this)"></p>
+                <p><input type="submit" id="confirmImport" value="Import"></p>
+            </div>
         </div>
     </div>
     <script src="script.js"></script>

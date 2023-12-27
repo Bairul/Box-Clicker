@@ -110,6 +110,14 @@ td {
     width: 40%;
 }
 
+#importDiv {
+    display: none;
+}
+
+#exportDiv {
+    display: none;
+}
+
 /* The Close Button */
 .close {
     color: #aaaaaa;

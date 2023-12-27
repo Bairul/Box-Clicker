@@ -81,7 +81,7 @@ let mouseCheck;
 let cursorColorPick;
 let preBoxColorPicks = [];
 // modals
-let exportModal = document.getElementById("exportPopup");
+let portModal = document.getElementById("exportPopup");
 
 function setup() {
     canvasPaddingX = max(MIN_PADDING, (window.innerWidth - WIDTH) / 2);
@@ -165,11 +165,6 @@ function setup() {
     hideMenuGui();
     hideRecordsGui();
 }
-
-
-// buttons
-
-
 
 // allow dynamic canvas resizing
 window.onresize = function() { 
