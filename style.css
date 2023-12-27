@@ -110,11 +110,11 @@ td {
     width: 40%;
 }
 
-#importDiv {
+#import-div {
     display: none;
 }
 
-#exportDiv {
+#export-div {
     display: none;
 }
 

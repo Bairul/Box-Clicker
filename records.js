@@ -47,8 +47,8 @@ function backGameRecords() {
         tabcontent[i].style.display = "none";
     }
 }
-const importContent = document.getElementById("importDiv");
-const exportContent = document.getElementById("exportDiv");
+const importContent = document.getElementById("import-div");
+const exportContent = document.getElementById("export-div");
 
 function hideModal() {
     portModal.style.display = "none";
