@@ -1,166 +1,20 @@
-<html>
 
+<!DOCTYPE html>
+<html>
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width">
-    <title>Box Clicker</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/p5.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.5.11/addons/p5.dom.min.js"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-    <link rel="stylesheet" href="style.css">
+    <title>Game Project Title Goes Here</title>
+  
+    <script type="text/javascript" src="./assetmanager.js"></script>
+    <script type="text/javascript" src="./timer.js"></script>
+    <script type="text/javascript" src="./gameengine.js"></script>
+    <script type="text/javascript" src="./util.js"></script>
+    <script type="text/javascript" src="./drawUtil.js"></script>
+    <script type="text/javascript" src="./grid.js"></script>
+    <script type="text/javascript" src="./scenemanager.js"></script>
+    <script type="text/javascript" src="./main.js"></script>
 </head>
-
 <body>
-    <!-- Tab links -->
-    <div id="recordstab" class="tab">
-        <button class="tablinks" onclick="openRecord(event, 'classic')" id="defaultOpen">Classic</button>
-        <button class="tablinks" onclick="openRecord(event, 'streamy')">Streamy</button>
-        <button class="tablinks" onclick="openRecord(event, 'jumpy')">Jumpy</button>
-        <button class="tablinks" onclick="openRecord(event, 'mixed')">Mixed</button>
-    </div>
-
-    <!-- Tab content -->
-    <div id="classic" class="tabcontent">
-        <table>
-            <tr>
-                <td id="top-left">
-                    <h3>Easy</h3>
-                    <p><span id="classic_easy_score"></span><br><span id="classic_easy_combo"></span><br><span
-                            id="classic_easy_mod"></span></p>
-                </td>
-                <td id="top-right">
-                    <h3>Normal</h3>
-                    <p><span id="classic_normal_score"></span><br><span id="classic_normal_combo"></span><br><span
-                            id="classic_normal_mod"></span></p>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <h3>Hard</h3>
-                    <p><span id="classic_hard_score"></span><br><span id="classic_hard_combo"></span><br><span
-                            id="classic_hard_mod"></span></p>
-                </td>
-                <td>
-                    <h3>Nightmare</h3>
-                    <p><span id="classic_nightmare_score"></span><br><span id="classic_nightmare_combo"></span><br><span
-                            id="classic_nightmare_mod"></span></p>
-                </td>
-            </tr>
-        </table>
-    </div>
-
-    <div id="streamy" class="tabcontent">
-        <table>
-            <tr>
-                <td id="top-left">
-                    <h3>Easy</h3>
-                    <p><span id="streamy_easy_score"></span><br><span id="streamy_easy_combo"></span><br><span
-                            id="streamy_easy_mod"></span></p>
-                </td>
-                <td id="top-right">
-                    <h3>Normal</h3>
-                    <p><span id="streamy_normal_score"></span><br><span id="streamy_normal_combo"></span><br><span
-                            id="streamy_normal_mod"></span></p>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <h3>Hard</h3>
-                    <p><span id="streamy_hard_score"></span><br><span id="streamy_hard_combo"></span><br><span
-                            id="streamy_hard_mod"></span></p>
-                </td>
-                <td>
-                    <h3>Nightmare</h3>
-                    <p><span id="streamy_nightmare_score"></span><br><span id="streamy_nightmare_combo"></span><br><span
-                            id="streamy_nightmare_mod"></span></p>
-                </td>
-            </tr>
-        </table>
-    </div>
-
-    <div id="jumpy" class="tabcontent">
-        <table>
-            <tr>
-                <td id="top-left">
-                    <h3>Easy</h3>
-                    <p><span id="jumpy_easy_score"></span><br><span id="jumpy_easy_combo"></span><br><span
-                            id="jumpy_easy_mod"></span></p>
-                </td>
-                <td id="top-right">
-                    <h3>Normal</h3>
-                    <p><span id="jumpy_normal_score"></span><br><span id="jumpy_normal_combo"></span><br><span
-                            id="jumpy_normal_mod"></span></p>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <h3>Hard</h3>
-                    <p><span id="jumpy_hard_score"></span><br><span id="jumpy_hard_combo"></span><br><span
-                            id="jumpy_hard_mod"></span></p>
-                </td>
-                <td>
-                    <h3>Nightmare</h3>
-                    <p><span id="jumpy_nightmare_score"></span><br><span id="jumpy_nightmare_combo"></span><br><span
-                            id="jumpy_nightmare_mod"></span></p>
-                </td>
-            </tr>
-        </table>
-    </div>
-
-    <div id="mixed" class="tabcontent">
-        <table>
-            <tr>
-                <td id="top-left">
-                    <h3>Easy</h3>
-                    <p><span id="mixed_easy_score"></span><br><span id="mixed_easy_combo"></span><br><span
-                            id="mixed_easy_mod"></span></p>
-                </td>
-                <td id="top-right">
-                    <h3>Normal</h3>
-                    <p><span id="mixed_normal_score"></span><br><span id="mixed_normal_combo"></span><br><span
-                            id="mixed_normal_mod"></span></p>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <h3>Hard</h3>
-                    <p><span id="mixed_hard_score"></span><br><span id="mixed_hard_combo"></span><br><span
-                            id="mixed_hard_mod"></span></p>
-                </td>
-                <td>
-                    <h3>Nightmare</h3>
-                    <p><span id="mixed_nightmare_score"></span><br><span id="mixed_nightmare_combo"></span><br><span
-                            id="mixed_nightmare_mod"></span></p>
-                </td>
-            </tr>
-        </table>
-    </div>
-
-    <!-- The Modal -->
-    <div id="exportPopup" class="modal">
-        <!-- Modal content -->
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <div id="export-div">
-                <p>Enter your name:</p>
-                <input type="text" id="exportName" maxlength="32" size="16">
-                <p><input type="submit" id="confirmExport" value="Export"></p>
-            </div>
-            <div id="import-div">
-                <p>Enter your name:</p>
-                <input type="text" id="importName" maxlength="32" size="16">
-                <p><input type="file" id="importFile" accept=".txt" onchange="openFile(this)"></p>
-                <p><input type="submit" id="confirmImport" value="Import"></p>
-            </div>
-            <div id="unsuccess-import">
-                <p>Sorry. Unable to import.</p>
-            </div>
-        </div>
-    </div>
-    <script src="script.js"></script>
-    <script src="menu.js"></script>
-    <script src="records.js"></script>
-    <script src="gameplay.js"></script>
+    <canvas id="gameWorld" width="1024" height="768" style="background: white; border: 1px solid black" tabindex="0" autofocus></canvas>
 </body>
-
 </html>
