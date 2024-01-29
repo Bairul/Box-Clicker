@@ -1,5 +1,5 @@
 /** Global Parameters Object */
-const PARAMS = { WIDTH: 1024, HEIGHT: 768 };
+const PARAMS = { WIDTH: 1024, HEIGHT: 768, START:false };
 
 /**
  * @param {Number} n
@@ -57,3 +57,11 @@ window.requestAnimFrame = (() => {
 const getDistance = (p1, p2) => {
     return Math.sqrt(Math.pow(p2.x - p1.x, 2) + Math.pow(p2.y - p1.y, 2));
 };
+
+function hideElement(elementid) {
+    document.getElementById(elementid).style.display = 'none';
+}
+
+function showElement(elementid) {
+    document.getElementById(elementid).style.display = 'block';
+}

@@ -14,6 +14,8 @@ class GameEngine {
         this.mouse = null;
         this.wheel = null;
         this.keys = {};
+        this.keypress = false;
+        this.keyclick = false;
 
         // Options and the Details
         this.options = options || {
@@ -72,8 +74,13 @@ class GameEngine {
             this.rightclick = getXandY(e);
         });
 
-        this.ctx.canvas.addEventListener("keydown", event => this.keys[event.key] = true);
-        this.ctx.canvas.addEventListener("keyup", event => this.keys[event.key] = false);
+        this.ctx.canvas.addEventListener("keydown", event => {
+            this.keypress = true;
+        });
+        this.ctx.canvas.addEventListener("keyup", event => {
+            this.keyclick = false;
+            this.keypress = false;
+        });
     };
 
     addEntity(entity) {
@@ -84,12 +91,13 @@ class GameEngine {
         // Clear the whole canvas with transparent color (rgba(0, 0, 0, 0))
         this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
 
+        this.ctx.fillStyle = rgb(175, 200, 255);
+        this.ctx.fillRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
+
         // Draw latest things first
         for (let i = this.entities.length - 1; i >= 0; i--) {
             this.entities[i].draw(this.ctx, this);
         }
-
-        this.camera.draw(this.ctx);
     };
 
     update() {
