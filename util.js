@@ -3,6 +3,7 @@ const PARAMS = {
     WIDTH: 600,
     HEIGHT: 500,
     START: false,
+    MENU: false,
     FONT: "Arial",
 };
 

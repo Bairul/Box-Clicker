@@ -19,6 +19,14 @@
 <body>
     <canvas id="gameWorld" width="600" height="500" style="background: white; border: 1px solid black" tabindex="0" autofocus></canvas>
     <button id="startButton" value="undefined" style="width: 80px; height: 30px; position:absolute; left: 268px; top: 456.5px;">Start</button>
-    <button id="restartButton" value="undefined" style="width: 80px; height: 30px; position:absolute; left: 268px; top: 456.5px;">Restart</button>
+    <button id="menuButton" value="undefined" style="width: 80px; height: 30px; position:absolute; left: 268px; top: 256.5px;">Menu</button>
+    <button id="backButton" value="undefined" style="width: 80px; height: 30px; position:absolute; left: 268px; top: 256.5px;">Back</button>
+    <select id="gamemodeSelect" style="position: absolute; left: 279px; top: 322.5px">
+        <option value="0">Classic</option>
+        <option value="1">Streamy</option>
+        <option value="2">Jumpy</option>
+        <option value="3">Mixed</option>
+    </select>
+    <input id="gridSlider" type="range" min="4" max="8" step="1" value="5" width="100" height="0" style="width: 100px; position: absolute; left: 279px; top: 372.5px;">
 </body>
 </html>

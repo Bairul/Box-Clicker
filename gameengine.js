@@ -94,6 +94,7 @@ class GameEngine {
         this.ctx.fillStyle = rgb(175, 200, 255);
         this.ctx.fillRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
 
+        if (PARAMS.MENU) return;
         // Draw latest things first
         for (let i = this.entities.length - 1; i >= 0; i--) {
             this.entities[i].draw(this.ctx, this);

@@ -13,7 +13,9 @@ class SceneManager {
     }
 
     update() {
-        if (PARAMS.START) {
+        if (PARAMS.MENU) {
+
+        } else if (PARAMS.START) {
             this.menu.removeFromWorld = true;
             this.gameplay.removeFromWorld = false;
             if (!this.startGame) {
