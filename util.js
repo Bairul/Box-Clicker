@@ -1,5 +1,10 @@
 /** Global Parameters Object */
-const PARAMS = { WIDTH: 1024, HEIGHT: 768, START:false };
+const PARAMS = {
+    WIDTH: 600,
+    HEIGHT: 500,
+    START: false,
+    FONT: "Arial",
+};
 
 /**
  * @param {Number} n
@@ -57,6 +62,10 @@ window.requestAnimFrame = (() => {
 const getDistance = (p1, p2) => {
     return Math.sqrt(Math.pow(p2.x - p1.x, 2) + Math.pow(p2.y - p1.y, 2));
 };
+
+const mouseOver = (mouse, x, y, w, h) => {
+    return mouse.x > x && mouse.x < x + w && mouse.y > y && mouse.y < y + h;
+}
 
 function hideElement(elementid) {
     document.getElementById(elementid).style.display = 'none';

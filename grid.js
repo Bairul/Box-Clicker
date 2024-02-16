@@ -9,15 +9,14 @@ class Box {
     }
 
     draw(ctx) {
-        ctx.strokeStyle = "black";
-        ctx.lineWidth = 1;
-        ctx.fillStyle = this.color;
-        if (this.premove === true) {
-            ctx.strokeStyle = "red";
-            ctx.lineWidth = 10;
-            ctx.strokeRect(this.x, this.y, this.size, this.size);
+        if (this.premove) {
+            stroke(ctx, "red");
+            strokeWeight(ctx, 10);
+            rect(ctx, this.x, this.y, this.size, this.size);
         } else {
-            ctx.fillRect(this.x, this.y, this.size, this.size);
+            stroke(ctx, "black");
+            strokeWeight(ctx, 1);
+            rect(ctx, this.x, this.y, this.size, this.size, this.color);
         }
     }
 }
@@ -29,8 +28,8 @@ class Grid {
     }
 
     draw(ctx) {
-        ctx.strokeStyle = "black";
-        ctx.lineWidth = 1;
+        stroke(ctx, "black");
+        strokeWeight(ctx, 1);
         for (let i = 1; i <= this.gridSize; i++) {
             line(ctx, PARAMS.HEIGHT * i / this.gridSize, 0, PARAMS.HEIGHT * i / this.gridSize, PARAMS.HEIGHT);
             line(ctx, 0, PARAMS.HEIGHT * i / this.gridSize, PARAMS.HEIGHT, PARAMS.HEIGHT * i / this.gridSize);
