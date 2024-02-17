@@ -13,26 +13,61 @@ const GAME_PARAMS = {
     MIXED_INTERVAL: 90,
 };
 class GameplayManager {
-    constructor(game, gridSize) {
+    constructor(game) {
         this.game = game;
-        this.gridSize = gridSize;
-        this.boxSize = PARAMS.HEIGHT / gridSize;
-
-        this.gmString = "classic";
-        this.diffString = "normal";
+        this.click = false;
+        
+        this.gmString = "";
+        this.diffString = "";
         this.maxTime = 12;
+        this.grid = new Grid(game, 5);
 
-        this.grid = new Grid(game, gridSize);
         this.preBoxColors = ["red", "blue", "lime", "yellow"];
-
         this.currentBox = new Box(0, 0, this.boxSize, "black");
         this.preBoxes = [];
         this.preBoxes.push(new Box(0, 0, this.boxSize, this.preBoxColors[0], true));
 
-        this.click = false;
-
-        this.randAllBoxes();
+        this.init(5, 0, 1);
         this.reset();
+    }
+
+    init(gridSize, gamemode, difficulty) {
+        this.grid.size = gridSize;
+        this.boxSize = PARAMS.HEIGHT / gridSize;
+
+        this.currentBox.size = this.boxSize;
+        this.preBoxes.forEach(b => {
+            b.size = this.boxSize;
+        });
+        this.randAllBoxes();
+
+        switch(gamemode) {
+            case 0:
+                this.gmString = "Classic";
+                break;
+            case 1:
+                this.gmString = "Streamy";
+                break;
+            case 2:
+                this.gmString = "Jumpy";
+                break;
+            default:
+                this.gmString = "Mixed";
+        }
+
+        switch(difficulty) {
+            case 0:
+                this.diffString = "Easy";
+                break;
+            case 1:
+                this.diffString = "Normal";
+                break;
+            case 2:
+                this.diffString = "Hard";
+                break;
+            default:
+                this.diffString = "Nightmare";
+        }
     }
 
     reset() {
@@ -105,7 +140,7 @@ class GameplayManager {
     }
 
     genRandGridVal() {
-        return randomInt(this.gridSize) * this.boxSize;
+        return randomInt(this.grid.size) * this.boxSize;
     }
 
     randAllBoxes() {

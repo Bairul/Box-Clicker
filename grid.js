@@ -22,17 +22,17 @@ class Box {
 }
 
 class Grid {
-    constructor(game, gridSize) {
+    constructor(game, size) {
         this.game = game;
-        this.gridSize = gridSize;
+        this.size = size;
     }
 
     draw(ctx) {
         stroke(ctx, "black");
         strokeWeight(ctx, 1);
-        for (let i = 1; i <= this.gridSize; i++) {
-            line(ctx, PARAMS.HEIGHT * i / this.gridSize, 0, PARAMS.HEIGHT * i / this.gridSize, PARAMS.HEIGHT);
-            line(ctx, 0, PARAMS.HEIGHT * i / this.gridSize, PARAMS.HEIGHT, PARAMS.HEIGHT * i / this.gridSize);
+        for (let i = 1; i <= this.size; i++) {
+            line(ctx, PARAMS.HEIGHT * i / this.size, 0, PARAMS.HEIGHT * i / this.size, PARAMS.HEIGHT);
+            line(ctx, 0, PARAMS.HEIGHT * i / this.size, PARAMS.HEIGHT, PARAMS.HEIGHT * i / this.size);
         }
     }
 }

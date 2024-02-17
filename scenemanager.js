@@ -3,8 +3,12 @@ class SceneManager {
         this.game = game;
         this.game.camera = this;
 
+        this.gamemode = 0;
+        this.gridsize = 5;
+
         this.menu = new Menu(game);
-        this.gameplay = new GameplayManager(game, 5);
+        this.gameplay = new GameplayManager(game, this.gridsize);
+        
         this.scoreboard = new Scoreboard(this.gameplay);
         this.startGame = false;
         this.firstTime = true;
@@ -12,14 +16,20 @@ class SceneManager {
         this.game.addEntity(this.menu);
     }
 
+    init() {
+        this.gameplay
+    }
+
     update() {
         if (PARAMS.MENU) {
-
+            this.gamemode = this.menu.getGamemode();
+            this.gridsize = this.menu.getGridsize();
         } else if (PARAMS.START) {
             this.menu.removeFromWorld = true;
             this.gameplay.removeFromWorld = false;
             if (!this.startGame) {
                 this.game.addEntity(this.gameplay);
+                this.gameplay.init(this.gridsize, this.gamemode, 1);
                 this.gameplay.reset();
                 if (this.firstTime) {
                     this.game.addEntity(this.scoreboard);

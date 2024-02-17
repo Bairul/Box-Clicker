@@ -12,6 +12,14 @@ class Menu {
         this.menubuttons();
     }
 
+    getGamemode() {
+        return this.gamemodeSelect.value;
+    }
+
+    getGridsize() {
+        return this.gridSlider.value;
+    }
+
     menubuttons() {
         let that = this;
         this.startButton.onclick = function() {
