@@ -5,6 +5,8 @@ const PARAMS = {
     START: false,
     MENU: false,
     FONT: "Arial",
+    canvasPaddingX: 0,
+    canvasPaddingY: 0,
 };
 
 /**
@@ -54,6 +56,7 @@ window.requestAnimFrame = (() => {
             window.setTimeout(callback, 1000 / 60);
         });
 })();
+
 
 /**
  * Returns distance from two points

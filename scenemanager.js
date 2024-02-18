@@ -5,6 +5,7 @@ class SceneManager {
 
         this.gamemode = 0;
         this.gridsize = 5;
+        this.difficluty = "";
 
         this.menu = new Menu(game);
         this.gameplay = new GameplayManager(game, this.gridsize);
@@ -16,10 +17,6 @@ class SceneManager {
         this.game.addEntity(this.menu);
     }
 
-    init() {
-        this.gameplay
-    }
-
     update() {
         if (PARAMS.MENU) {
             this.gamemode = this.menu.getGamemode();
@@ -29,7 +26,7 @@ class SceneManager {
             this.gameplay.removeFromWorld = false;
             if (!this.startGame) {
                 this.game.addEntity(this.gameplay);
-                this.gameplay.init(this.gridsize, this.gamemode, 1);
+                this.gameplay.init(this.gridsize, this.gamemode, "1");
                 this.gameplay.reset();
                 if (this.firstTime) {
                     this.game.addEntity(this.scoreboard);
