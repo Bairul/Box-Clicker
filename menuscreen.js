@@ -27,20 +27,20 @@ class Menu {
 
     menubuttons() {
         let that = this;
-        this.startButton.onclick = function() {
+        this.startButton.onclick = function () {
             PARAMS.START = true;
             document.getElementById("gameWorld").focus();
             hideElement("startButton");
             hideElement("menuButton");
         }
-        this.menuButton.onclick = function() {
+        this.menuButton.onclick = function () {
             PARAMS.MENU = true;
             document.getElementById("gameWorld").focus();
             hideElement("menuButton");
             hideElement("startButton");
             that.showMenuOptions();
         }
-        this.backButton.onclick = function() {
+        this.backButton.onclick = function () {
             PARAMS.MENU = false;
             document.getElementById("gameWorld").focus();
             that.hideMenuOptions();
@@ -94,7 +94,7 @@ class Menu {
             this.startButton.style.left = PARAMS.canvasPaddingX + PARAMS.WIDTH / 2 - 90 + "px";
             this.startButton.style.top = PARAMS.canvasPaddingY + PARAMS.HEIGHT / 2 - 15 / 2 + "px";
         }
-        
+
     }
 
     draw(ctx) {

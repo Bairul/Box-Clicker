@@ -11,6 +11,9 @@ const GAME_PARAMS = {
     MISS_COMBO: GUI_PARAMS.HEALTHBAR_SEG_LEN / 5,
     MIN_DECAYBAR: GUI_PARAMS.HEALTHBAR_Y - 5,
     MIXED_INTERVAL: 90,
+    MISS_DECAY: [0, 20, 40, 0],
+    NATURAL_DECAY: [0, 0, 0, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75, 3],
+    POINTS: [10, 25, 50, 10, 50, 100, 50, 100, 150, 100, 200, 300],
 };
 class GameplayManager {
     constructor(game) {
@@ -23,7 +26,7 @@ class GameplayManager {
         this.difficulty = 1;
         this.mixedRandMode = 0;
         this.diffString = "";
-        this.maxTime = 9;
+        this.maxTime = 30;
         this.grid = new Grid(game, 5);
 
         this.preBoxColors = ["red", "blue", "lime", "yellow"];
@@ -100,11 +103,30 @@ class GameplayManager {
             this.maxCombo = this.combo;
         }
 
+        // framecount and timer
         this.elapsed += this.game.clockTick;
         if (this.time == 0) {
             this.endGameplay();
+            return;
         } else {
             this.time = this.maxTime - Math.floor(this.elapsed);
+        }
+
+        // natural decayBar of health gets faster over time
+        if (this.decayBar >= GAME_PARAMS.MIN_DECAYBAR) {
+            this.decayBar = GAME_PARAMS.MIN_DECAYBAR;
+            if (this.difficulty > 1) {
+                this.endGameplay();
+                return;
+            }
+        } else if (PARAMS.START) {
+            if (this.time < this.maxTime / 3) {
+                this.decayBar += GAME_PARAMS.NATURAL_DECAY[this.difficulty * 3 + 2];
+            } else if (this.time >= this.maxTime / 3 && this.time < this.maxTime / 3 * 2) {
+                this.decayBar += GAME_PARAMS.NATURAL_DECAY[this.difficulty * 3 + 1];
+            } else {
+                this.decayBar += GAME_PARAMS.NATURAL_DECAY[this.difficulty * 3];
+            }
         }
 
         // for mixed gamemode
@@ -118,8 +140,14 @@ class GameplayManager {
     play() {
         if (!this.isOnMouse()) { // miss
             console.log("miss");
-            // broken combo
-            this.combo = 0;
+            if (this.difficulty === 3) {
+                this.endGameplay();
+                return;
+            } else if (this.difficulty > 0) {
+                // broken combo
+                this.combo = 0;
+                this.decayBar += GAME_PARAMS.MISS_DECAY[this.difficulty];
+            }
             return;
         }
 
@@ -139,8 +167,6 @@ class GameplayManager {
         } else if (this.gamemode === 2 || (this.gamemode === 3 && this.mixedRandMode === 2)) {
             this.jumpy();
         }
-
-        
 
         // combo and points
         this.combo++;
@@ -293,26 +319,14 @@ class Scoreboard {
         let color = "";
         // point decreases as health drops to encourage maintaining health
         if (this.gp.decayBar <= GUI_PARAMS.HEALTHBAR_Y / 3) {
-            color = rgba(50, 100, 255, 120); // blue
-            this.gp.point = 100;
+            color = rgba(50, 100, 255, 0.5); // blue
+            this.gp.point = GAME_PARAMS.POINTS[this.gp.difficulty * 3 + 2];
         } else if (this.gp.decayBar > GUI_PARAMS.HEALTHBAR_Y / 3 && this.gp.decayBar < GUI_PARAMS.HEALTHBAR_Y / 3 * 2) {
-            color = rgba(100, 255, 50, 120); // green
-            this.gp.point = 50;
+            color = rgba(100, 255, 50, 0.5); // green
+            this.gp.point = GAME_PARAMS.POINTS[this.gp.difficulty * 3 + 1];
         } else {
-            color = rgba(255, 0, 0, 120); // red
-            this.gp.point = 10;
-        }
-        // natural decayBar of health gets faster over time
-        if (this.gp.decayBar >= GAME_PARAMS.MIN_DECAYBAR) {
-            this.gp.decayBar = GAME_PARAMS.MIN_DECAYBAR;
-        } else if (PARAMS.START) {
-            if (this.gp.time < this.gp.maxTime / 3) {
-                this.gp.decayBar += 3
-            } else if (this.gp.time >= this.gp.maxTime / 3 && this.gp.time < this.gp.maxTime / 3 * 2) {
-                this.gp.decayBar += 2
-            } else {
-                this.gp.decayBar += 1
-            }
+            color = rgba(255, 0, 0, 0.5); // red
+            this.gp.point = GAME_PARAMS.POINTS[this.gp.difficulty * 3];
         }
         // decay bar
         rect(ctx, gaugeX, PARAMS.HEIGHT / 2 - GUI_PARAMS.HEALTHBAR_SEG_LEN + this.gp.decayBar, GAME_PARAMS.HEALTHBAR_SEG_WID, GUI_PARAMS.HEALTHBAR_Y - this.gp.decayBar, color, "gray");

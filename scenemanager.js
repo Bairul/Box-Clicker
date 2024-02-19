@@ -47,4 +47,27 @@ class SceneManager {
             this.startGame = false;
         }
     }
+
+    draw(ctx) {
+        if (PARAMS.MENU) {
+            const MENU_X = 120;
+            const MENU_Y = 185;
+            const SP = 16;
+            rect(ctx, MENU_X, MENU_Y, 145, 152, rgb(230, 230, 230), "black");
+            textSize(ctx, 12);
+            text(ctx, "Classic: random", MENU_X + 2, MENU_Y + SP);
+            text(ctx, "Streamy: close random", MENU_X + 2, MENU_Y + SP * 2);
+            text(ctx, "Jumpy: far random", MENU_X + 2, MENU_Y + SP * 3);
+            text(ctx, "Mixed: random modes", MENU_X + 2, MENU_Y + SP * 4);
+            text(ctx, "Easy: no miss & life lost", MENU_X + 2, MENU_Y + SP * 6);
+            text(ctx, "Normal: normal", MENU_X + 2, MENU_Y + SP * 7);
+            text(ctx, "Hard: no life you lose", MENU_X + 2, MENU_Y + SP * 8);
+            text(ctx, "Nightmare: miss you lose", MENU_X + 2, MENU_Y + SP * 9);
+            rect(ctx, MENU_X, MENU_Y + SP * 11, 300, 80, rgb(230, 230, 230), "black");
+            text(ctx, "Instructions:", MENU_X + 2, MENU_Y + SP * 12);
+            text(ctx, "Click on black box using mouse click or any key press. ", MENU_X + 2, MENU_Y + SP * 13);
+            text(ctx, "Your score depends on combo and health.", MENU_X + 2, MENU_Y + SP * 14);
+            text(ctx, "Red square shows where the black box will be at next.", MENU_X + 2, MENU_Y + SP * 15);
+        }
+    }
 }
