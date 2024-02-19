@@ -16,6 +16,7 @@ class GameEngine {
         this.keys = {};
         this.keypress = false;
         this.keyclick = false;
+        this.escape = false;
 
         // Options and the Details
         this.options = options || {
@@ -76,6 +77,7 @@ class GameEngine {
 
         this.ctx.canvas.addEventListener("keydown", event => {
             this.keypress = true;
+            this.escape = event.key === "Escape";
         });
         this.ctx.canvas.addEventListener("keyup", event => {
             this.keyclick = false;
@@ -128,6 +130,7 @@ class GameEngine {
         this.update();
         this.draw();
         this.click = null;
+        this.escape = false;
     };
 
 };

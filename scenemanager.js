@@ -63,11 +63,12 @@ class SceneManager {
             text(ctx, "Normal: normal", MENU_X + 2, MENU_Y + SP * 7);
             text(ctx, "Hard: no life you lose", MENU_X + 2, MENU_Y + SP * 8);
             text(ctx, "Nightmare: miss you lose", MENU_X + 2, MENU_Y + SP * 9);
-            rect(ctx, MENU_X, MENU_Y + SP * 11, 300, 80, rgb(230, 230, 230), "black");
+            rect(ctx, MENU_X, MENU_Y + SP * 11, 300, 85, rgb(230, 230, 230), "black");
             text(ctx, "Instructions:", MENU_X + 2, MENU_Y + SP * 12);
             text(ctx, "Click on black box using mouse click or any key press. ", MENU_X + 2, MENU_Y + SP * 13);
             text(ctx, "Your score depends on combo and health.", MENU_X + 2, MENU_Y + SP * 14);
             text(ctx, "Red square shows where the black box will be at next.", MENU_X + 2, MENU_Y + SP * 15);
+            text(ctx, "Press Escape to quit current game.", MENU_X + 2, MENU_Y + SP * 16);
         }
     }
 }

@@ -91,6 +91,10 @@ class GameplayManager {
 
     update() {
         if (this.game.keypress && this.game.keyclick === false) {
+            if (this.game.escape) {
+                this.endGameplay();
+                return;
+            }
             this.game.keyclick = true;
             this.play();
         }
