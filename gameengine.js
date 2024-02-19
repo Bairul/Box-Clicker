@@ -119,8 +119,6 @@ class GameEngine {
                 this.entities.splice(i, 1);
             }
         }
-
-        console.log(PARAMS.canvasPaddingX + " " + PARAMS.canvasPaddingY);
     };
 
     loop() {

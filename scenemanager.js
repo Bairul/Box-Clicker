@@ -3,9 +3,9 @@ class SceneManager {
         this.game = game;
         this.game.camera = this;
 
-        this.gamemode = 0;
-        this.gridsize = 5;
-        this.difficluty = "";
+        this.gamemode = "0";
+        this.gridsize = "5";
+        this.difficluty = "1";
 
         this.menu = new Menu(game);
         this.gameplay = new GameplayManager(game, this.gridsize);
@@ -21,16 +21,18 @@ class SceneManager {
         if (PARAMS.MENU) {
             this.gamemode = this.menu.getGamemode();
             this.gridsize = this.menu.getGridsize();
+            this.difficluty = this.menu.getDifficulty();
         } else if (PARAMS.START) {
             this.menu.removeFromWorld = true;
             this.gameplay.removeFromWorld = false;
             if (!this.startGame) {
                 this.game.addEntity(this.gameplay);
-                this.gameplay.init(this.gridsize, this.gamemode, "1");
+                this.gameplay.init(this.gridsize, this.gamemode, this.difficluty);
                 this.gameplay.reset();
                 if (this.firstTime) {
                     this.game.addEntity(this.scoreboard);
                     this.firstTime = false;
+                    this.menu.firstTime = false;
                 }
             }
             this.startGame = true;
