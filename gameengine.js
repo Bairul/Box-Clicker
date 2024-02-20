@@ -8,15 +8,19 @@ class GameEngine {
 
         // Everything that will be updated and drawn each frame
         this.entities = [];
+        this.elapsed = 0;
 
         // Information on the input
         this.click = null;
         this.mouse = null;
+        this.pmouse = null;
         this.wheel = null;
         this.keys = {};
         this.keypress = false;
         this.keyclick = false;
         this.escape = false;
+        this.mousePressed = false;
+        this.mouseClicked = false;
 
         // Options and the Details
         this.options = options || {
@@ -52,12 +56,21 @@ class GameEngine {
             this.mouse = getXandY(e);
         });
 
-        this.ctx.canvas.addEventListener("click", e => {
-            if (this.options.debugging) {
-                console.log("CLICK", getXandY(e));
-            }
-            this.click = getXandY(e);
+        this.ctx.canvas.addEventListener("mousedown", e => {
+            this.mousePressed = true;
         });
+
+        this.ctx.canvas.addEventListener("mouseup", e => {
+            this.mousePressed = false;
+            this.mouseClicked = false;
+        });
+
+        // this.ctx.canvas.addEventListener("click", e => {
+        //     if (this.options.debugging) {
+        //         console.log("CLICK", getXandY(e));
+        //     }
+        //     this.click = getXandY(e);
+        // });
 
         this.ctx.canvas.addEventListener("wheel", e => {
             if (this.options.debugging) {
@@ -129,7 +142,12 @@ class GameEngine {
         this.clockTick = this.timer.tick();
         this.update();
         this.draw();
-        this.click = null;
+
+        if (this.elapsed > 0.025) {
+            this.pmouse = this.mouse;
+            this.elapsed = 0;
+        }
+        this.elapsed += this.clockTick;
         this.escape = false;
     };
 

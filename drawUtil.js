@@ -1,11 +1,3 @@
-function line(ctx, x1, y1, x2, y2) {
-    ctx.beginPath();
-    ctx.moveTo(x1, y1);
-    ctx.lineTo(x2, y2);
-    ctx.stroke();
-}
-
-
 function stroke(ctx, r, g, b, a) {
     if (a) {
         ctx.strokeStyle = rgba(r, g, b, a);
@@ -64,6 +56,28 @@ function rect(ctx, x, y, w, h, fill, border) {
     }
 }
 
+function line(ctx, x1, y1, x2, y2) {
+    if (x1 === x2 && y1 === y2) {
+        ctx.beginPath();
+        ctx.arc(x1, y1, ctx.lineWidth / 2, 0, 2 * Math.PI);
+        ctx.fillStyle = ctx.strokeStyle;
+        ctx.fill();
+    } else {
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.stroke();
+    }
+}
+
 function textSize(ctx, size) {
     ctx.font = size + 'px ' + PARAMS.FONT;
+}
+
+function noCursor() {
+    document.getElementById("gameWorld").style.cursor = "none";
+}
+
+function cursor() {
+    document.getElementById("gameWorld").style.cursor = "default";
 }

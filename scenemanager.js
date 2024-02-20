@@ -29,6 +29,7 @@ class SceneManager {
                 this.game.addEntity(this.gameplay);
                 this.gameplay.init(this.gridsize, this.gamemode, this.difficluty);
                 this.gameplay.reset();
+                noCursor();
                 if (this.firstTime) {
                     this.game.addEntity(this.scoreboard);
                     this.firstTime = false;
@@ -69,6 +70,6 @@ class SceneManager {
             text(ctx, "Your score depends on combo and health.", MENU_X + 2, MENU_Y + SP * 14);
             text(ctx, "Red square shows where the black box will be at next.", MENU_X + 2, MENU_Y + SP * 15);
             text(ctx, "Press Escape to quit current game.", MENU_X + 2, MENU_Y + SP * 16);
-        }
+        } 
     }
 }

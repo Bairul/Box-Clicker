@@ -98,8 +98,8 @@ class GameplayManager {
             this.game.keyclick = true;
             this.play();
         }
-        else if (this.game.click) {
-            this.game.click = null;
+        else if (this.game.mousePressed && this.game.mouseClicked === false) {
+            this.game.mouseClicked = true;
             this.play();
         }
 
@@ -215,6 +215,7 @@ class GameplayManager {
     endGameplay() {
         PARAMS.START = false;
         this.time = 0;
+        cursor();
     }
 
     isOnMouse() {
@@ -240,7 +241,9 @@ class GameplayManager {
             this.preBoxes[i].draw(ctx);
         }
 
-        ctx.fillRect(this.game.mouse.x, this.game.mouse.y, 5, 5);
+        stroke(ctx, "red");
+        strokeWeight(ctx, 5);
+        line(ctx, this.game.mouse.x, this.game.mouse.y, this.game.pmouse.x, this.game.pmouse.y);
     }
 }
 
