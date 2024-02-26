@@ -75,7 +75,6 @@ class Menu {
         this.backButton.style.top = PARAMS.canvasPaddingY + "px";
 
         const MENU_X = 150;
-        const MENU_Y = 185;
         const vomMenuX = PARAMS.canvasPaddingX + MENU_X;
         const vomMenuY = PARAMS.canvasPaddingY + MENU_X;
         const vomMenuSlidX = vomMenuX + 100 * 2;

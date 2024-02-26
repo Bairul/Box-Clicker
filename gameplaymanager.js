@@ -15,12 +15,21 @@ const GAME_PARAMS = {
     NATURAL_DECAY: [0, 0, 0, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75, 3],
     POINTS: [10, 25, 50, 10, 50, 100, 50, 100, 150, 100, 200, 300],
 };
+
+const RECORDS =
+    [
+        // easy, normal, hard, night
+        [0, 0, 0, 0], // classic
+        [0, 0, 0, 0], // streamy
+        [0, 0, 0, 0], // jumpy
+        [0, 0, 0, 0], // mixed
+    ];
 class GameplayManager {
     constructor(game) {
         this.game = game;
         this.click = false;
         this.frameCount = 0;
-        
+
         this.gmString = "";
         this.gamemode = 0;
         this.difficulty = 1;
@@ -50,7 +59,7 @@ class GameplayManager {
         });
         this.randAllBoxes();
 
-        switch(this.gamemode) {
+        switch (this.gamemode) {
             case 0:
                 this.gmString = "Classic";
                 break;
@@ -64,7 +73,7 @@ class GameplayManager {
                 this.gmString = "Mixed";
         }
 
-        switch(this.difficulty) {
+        switch (this.difficulty) {
             case 0:
                 this.diffString = "Easy";
                 break;
@@ -201,20 +210,23 @@ class GameplayManager {
     jumpy() {
         let newX = this.genRandGridVal();
         let newY = this.genRandGridVal();
-    
+
         while (Math.abs(this.preBoxes[this.preBoxes.length - 1].x - newX) < this.boxSize - 1) {
             newX = this.genRandGridVal();
         }
         while (Math.abs(this.preBoxes[this.preBoxes.length - 1].y - newY) < this.boxSize - 1) {
             newY = this.genRandGridVal();
         }
-    
+
         this.preBoxes[this.preBoxes.length - 1].updateCoord(newX, newY);
     }
 
     endGameplay() {
         PARAMS.START = false;
         this.time = 0;
+        if (this.score > RECORDS[this.gamemode][this.difficulty]) {
+            RECORDS[this.gamemode][this.difficulty] = this.score;
+        }
         cursor();
     }
 
@@ -253,7 +265,7 @@ class Scoreboard {
     }
 
     update() {
-        
+
     }
 
     draw(ctx) {
@@ -279,8 +291,16 @@ class Scoreboard {
         text(ctx, this.gp.diffString, GAME_PARAMS.SCOREBOARD_X, GUI_PARAMS.SCOREBOARD_TEXTSIZE * 2);
 
         textSize(ctx, GUI_PARAMS.SCOREBOARD_TEXTSIZE);
-        text(ctx, "Score:", GAME_PARAMS.SCOREBOARD_X, GUI_PARAMS.SCOREBOARD_TEXTSIZE * 3);
-        text(ctx, this.gp.score, GAME_PARAMS.SCOREBOARD_X, GUI_PARAMS.SCOREBOARD_TEXTSIZE * 4);
+        if (PARAMS.START) {
+            text(ctx, "Score:", GAME_PARAMS.SCOREBOARD_X, GUI_PARAMS.SCOREBOARD_TEXTSIZE * 3);
+            text(ctx, this.gp.score, GAME_PARAMS.SCOREBOARD_X, GUI_PARAMS.SCOREBOARD_TEXTSIZE * 4);
+        } else {
+            text(ctx, "Highscore:", GAME_PARAMS.SCOREBOARD_X, GUI_PARAMS.SCOREBOARD_TEXTSIZE * 3);
+            text(ctx, RECORDS[this.gp.gamemode][this.gp.difficulty], GAME_PARAMS.SCOREBOARD_X, GUI_PARAMS.SCOREBOARD_TEXTSIZE * 4);
+            text(ctx, "Score:", PARAMS.WIDTH / 2  - 50, PARAMS.HEIGHT / 2  + 40);
+            text(ctx, this.gp.score, PARAMS.WIDTH / 2  - 50, PARAMS.HEIGHT / 2  + 60);
+        }
+        
         text(ctx, "Time:", GAME_PARAMS.SCOREBOARD_X, GUI_PARAMS.SCOREBOARD_TEXTSIZE * 5);
 
         text(ctx, "Combo:", GAME_PARAMS.SCOREBOARD_X, PARAMS.HEIGHT - GUI_PARAMS.SCOREBOARD_TEXTSIZE * 2);
@@ -319,10 +339,10 @@ class Scoreboard {
         let gaugeX = PARAMS.WIDTH - GUI_PARAMS.SCOREBOARD_WIDTH + (GUI_PARAMS.SCOREBOARD_WIDTH - GAME_PARAMS.HEALTHBAR_SEG_WID) / 2;
         // draw healthbar gauge
         for (let i = 0; i <= 2; i++) {
-            rect(ctx, gaugeX, PARAMS.HEIGHT / 2 - GUI_PARAMS.HEALTHBAR_SEG_LEN, GAME_PARAMS.HEALTHBAR_SEG_WID, GUI_PARAMS.HEALTHBAR_Y - i * 
-                                                                            (GUI_PARAMS.HEALTHBAR_Y / 3), rgb(180, 180, 180), "black");
+            rect(ctx, gaugeX, PARAMS.HEIGHT / 2 - GUI_PARAMS.HEALTHBAR_SEG_LEN, GAME_PARAMS.HEALTHBAR_SEG_WID, GUI_PARAMS.HEALTHBAR_Y - i *
+                (GUI_PARAMS.HEALTHBAR_Y / 3), rgb(180, 180, 180), "black");
         }
-    
+
         let color = "";
         // point decreases as health drops to encourage maintaining health
         if (this.gp.decayBar <= GUI_PARAMS.HEALTHBAR_Y / 3) {
