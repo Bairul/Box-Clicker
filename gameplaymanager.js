@@ -38,7 +38,7 @@ class GameplayManager {
         this.grid = new Grid(game, 5);
 
         this.preBoxesColorCycle = 0;
-        this.preBoxColors = [new Color4(255, 0, 0, 1), new Color4(0, 0, 255, 1), new Color4(255, 87, 51, 1), new Color4(0, 255, 255, 1)];
+        this.preBoxColors = [new Color4(255, 0, 0, 1), new Color4(0, 0, 255, 1), new Color4(50, 205, 51, 1), new Color4(0, 255, 255, 1)];
         this.currentBox = new Box(0, 0, this.boxSize, new Color4(0, 0, 0, 1), 1);
         this.preBoxes = [];
 
@@ -270,6 +270,7 @@ class GameplayManager {
 
         this.currentBox.draw(ctx);
         for (let i = this.preBoxes.length - 1; i >= 0; i--) {
+            this.preBoxes[i].color.a = 1 / (this.showFade ? (i + 1) : 1);
             this.preBoxes[i].draw(ctx);
         }
 
@@ -281,7 +282,6 @@ class GameplayManager {
         if (this.showLines && this.preBoxes.length > 0) {
             for (let i = this.preBoxes.length - 1; i > 0; i--) {
                 stroke(ctx, this.preBoxes[i].color.toString());
-                //stroke(red(this.preBoxes[i].c), green(this.preBoxes[i].c), blue(this.preBoxes[i].c), 255 / (showTransCheck.checked() ? (i + 1) : 1));
                 strokeWeight(ctx, this.weight);
                 line(ctx, this.preBoxes[i - 1].x + this.boxSize / 2, this.preBoxes[i - 1].y + this.boxSize / 2, this.preBoxes[i].x + this.boxSize / 2, this.preBoxes[i].y + this.boxSize / 2);
             }
