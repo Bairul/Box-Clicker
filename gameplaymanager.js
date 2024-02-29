@@ -14,6 +14,7 @@ const GAME_PARAMS = {
     MISS_DECAY: [0, 20, 40, 0],
     NATURAL_DECAY: [0, 0, 0, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75, 3],
     POINTS: [10, 25, 50, 10, 50, 100, 50, 100, 150, 100, 200, 300],
+    SIZE_MUL: [0.75, 1, 1.25, 2, 3]
 };
 
 const RECORDS =
@@ -203,7 +204,7 @@ class GameplayManager {
 
         // combo and points
         this.combo++;
-        this.score += this.point * this.combo; // point system
+        this.score += this.point * this.combo * GAME_PARAMS.SIZE_MUL[this.grid.size - 4]; // point system
         if (this.decayBar > GAME_PARAMS.HEALTH_GAIN) {
             this.decayBar -= GAME_PARAMS.HEALTH_GAIN;
         } else { // avoid overfill
