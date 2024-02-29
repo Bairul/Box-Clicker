@@ -1,6 +1,6 @@
 class Box {
-    constructor(x, y, size, color, premove) {
-        Object.assign(this, { x, y, size, color, premove });
+    constructor(x, y, size, color, weight, premove) {
+        Object.assign(this, { x, y, size, color, weight, premove });
     }
 
     updateCoord(x, y) {
@@ -9,12 +9,11 @@ class Box {
     }
 
     draw(ctx) {
+        stroke(ctx, this.color);
         if (this.premove) {
-            stroke(ctx, "red");
-            strokeWeight(ctx, 10);
+            strokeWeight(ctx, this.weight);
             rect(ctx, this.x, this.y, this.size, this.size);
         } else {
-            stroke(ctx, "black");
             strokeWeight(ctx, 1);
             rect(ctx, this.x, this.y, this.size, this.size, this.color);
         }

@@ -15,18 +15,21 @@
     <script type="text/javascript" src="./gameplaymanager.js"></script>
     <script type="text/javascript" src="./scenemanager.js"></script>
     <script type="text/javascript" src="./main.js"></script>
+    <link rel="stylesheet" href="./style.css">
 </head>
 <body>
     <canvas id="gameWorld" width="600" height="500" style="background: white; border: 1px solid black; cursor: default;" tabindex="0" autofocus></canvas>
     <button id="startButton" value="undefined" style="width: 80px; height: 30px; position:absolute; left: 268px; top: 456.5px;">Start</button>
     <button id="menuButton" value="undefined" style="width: 80px; height: 30px; position:absolute; left: 268px; top: 256.5px;">Menu</button>
     <button id="backButton" value="undefined" style="width: 80px; height: 30px; position:absolute; left: 268px; top: 256.5px;">Back</button>
+    <span id="gamemodesTooltip" style="position: absolute; left: 279px; top: 322.5px" class="tooltip">Gamemodes<span class="tooltiptext">Classic: random<br>Streamy: close random<br>Jumpy: far random<br>Mixed: random modes</span></span>
     <select id="gamemodeSelect" style="position: absolute; left: 279px; top: 322.5px">
         <option value="0">Classic</option>
         <option value="1">Streamy</option>
         <option value="2">Jumpy</option>
         <option value="3">Mixed</option>
     </select>
+    <span id="difficultyTooltip" style="position: absolute; left: 556px; top: 322.5px" class="tooltip">Difficulty<span class="tooltiptext">Easy: no miss & life lost<br>Normal: normal<br>Hard: no life you lose<br>Nightmare: miss you lose</span></span>
     <select id="difficultySelect" style="position: absolute; left: 556px; top: 263px;">
         <option value="0">Easy</option>
         <option value="1" selected="selected">Normal</option>
@@ -34,6 +37,11 @@
         <option value="3">Nightmare</option>
     </select>
     <input id="gridSlider" type="range" min="4" max="8" step="1" value="5" width="100" height="0" style="width: 100px; position: absolute; left: 279px; top: 372.5px;">
+    <input id="premoveSlider" type="range" min="0" max="4" step="1" value="1" width="100" height="0" style="width: 100px; position: absolute; left: 396px; top: 313px;">
+    <input type="checkbox" id="linesCheckbox" style="position: absolute; left: 471px; top: 362px;">
+    <input type="checkbox" id="fadeCheckbox" style="position: absolute; left: 471px; top: 390px;">
+    <input type="checkbox" id="mouseCheckbox" style="position: absolute; left: 276px; top: 422px;" checked>
+
     <script type="text/javascript" src="./resize.js"></script>
 </body>
 </html>

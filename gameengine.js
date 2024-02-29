@@ -21,11 +21,6 @@ class GameEngine {
         this.escape = false;
         this.mousePressed = false;
         this.mouseClicked = false;
-
-        // Options and the Details
-        this.options = options || {
-            debugging: false,
-        };
     };
 
     init(ctx) {
@@ -50,9 +45,6 @@ class GameEngine {
         });
         
         this.ctx.canvas.addEventListener("mousemove", e => {
-            if (this.options.debugging) {
-                console.log("MOUSE_MOVE", getXandY(e));
-            }
             this.mouse = getXandY(e);
         });
 
@@ -73,17 +65,17 @@ class GameEngine {
         // });
 
         this.ctx.canvas.addEventListener("wheel", e => {
-            if (this.options.debugging) {
-                console.log("WHEEL", getXandY(e), e.wheelDelta);
-            }
+            // if (this.options.debugging) {
+            //     console.log("WHEEL", getXandY(e), e.wheelDelta);
+            // }
             e.preventDefault(); // Prevent Scrolling
             this.wheel = e;
         });
 
         this.ctx.canvas.addEventListener("contextmenu", e => {
-            if (this.options.debugging) {
-                console.log("RIGHT_CLICK", getXandY(e));
-            }
+            // if (this.options.debugging) {
+            //     console.log("RIGHT_CLICK", getXandY(e));
+            // }
             e.preventDefault(); // Prevent Context Menu
             this.rightclick = getXandY(e);
         });
@@ -111,7 +103,11 @@ class GameEngine {
 
         this.camera.draw(this.ctx);
 
-        if (PARAMS.MENU) return;
+        if (PARAMS.MENU) {
+            this.camera.menu.draw(this.ctx);
+            return;
+        }
+            
         // Draw latest things first
         for (let i = this.entities.length - 1; i >= 0; i--) {
             this.entities[i].draw(this.ctx, this);

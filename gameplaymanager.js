@@ -25,38 +25,46 @@ const RECORDS =
         [0, 0, 0, 0], // mixed
     ];
 class GameplayManager {
-    constructor(game) {
+    constructor(game, gridSize, gamemode, difficulty, premoves, mouse, lines, fade) {
         this.game = game;
         this.click = false;
         this.frameCount = 0;
+        this.allowMouse = true;
 
-        this.gmString = "";
-        this.gamemode = 0;
-        this.difficulty = 1;
-        this.mixedRandMode = 0;
-        this.diffString = "";
+        // this.gmString = "";
+        // this.diffString = "";
         this.maxTime = 30;
+        this.mixedRandMode = 0;
         this.grid = new Grid(game, 5);
 
+        this.preBoxesColorCycle = 0;
         this.preBoxColors = ["red", "blue", "lime", "yellow"];
-        this.currentBox = new Box(0, 0, this.boxSize, "black");
+        this.currentBox = new Box(0, 0, this.boxSize, "black", 10);
         this.preBoxes = [];
-        this.preBoxes.push(new Box(0, 0, this.boxSize, this.preBoxColors[0], true));
 
-        this.init("5", "0", "1");
         this.reset();
+        this.init(gridSize, gamemode, difficulty, premoves, mouse, lines, fade);
     }
 
-    init(gridSize, gamemode, difficulty) {
+    init(gridSize, gamemode, difficulty, premoves, mouse, lines, fade) {
         this.grid.size = parseInt(gridSize);
         this.gamemode = parseInt(gamemode);
         this.difficulty = parseInt(difficulty);
+        this.premoves = parseInt(premoves);
+        this.allowMouse = mouse;
+        this.showLines = lines;
+        this.showFade = fade;
 
         this.boxSize = PARAMS.HEIGHT / gridSize;
         this.currentBox.size = this.boxSize;
-        this.preBoxes.forEach(b => {
-            b.size = this.boxSize;
-        });
+
+        // sets preboxes
+        this.preBoxes.length = 0;
+        // there is at least 1 prebox
+        this.preBoxes.push(new Box(0, 0, this.boxSize, this.preBoxColors[0], 10, true));
+        for (let i = 1; i < this.premoves; i++) {
+            this.preBoxes.push(new Box(0, 0, this.boxSize, this.preBoxColors[i], 10, true));
+        }
         this.randAllBoxes();
 
         switch (this.gamemode) {
@@ -96,9 +104,17 @@ class GameplayManager {
         this.point = 0;
         this.time = this.maxTime;
         this.elapsed = 0;
+
+        // reset colors
+        this.preBoxesColorCycle = this.preBoxes.length - 1;
+        for (let i = this.preBoxes.length - 1; i >= 0; i--) {
+            this.preBoxes[i].color = this.preBoxColors[i];
+        }
     }
 
     update() {
+        if (!PARAMS.START) return;
+
         if (this.game.keypress && this.game.keyclick === false) {
             if (this.game.escape) {
                 this.endGameplay();
@@ -107,7 +123,7 @@ class GameplayManager {
             this.game.keyclick = true;
             this.play();
         }
-        else if (this.game.mousePressed && this.game.mouseClicked === false) {
+        else if (this.game.mousePressed && this.game.mouseClicked === false && this.allowMouse) {
             this.game.mouseClicked = true;
             this.play();
         }
@@ -171,6 +187,9 @@ class GameplayManager {
             this.preBoxes[i - 1].updateCoord(this.preBoxes[i].x, this.preBoxes[i].y);
             this.preBoxes[i - 1].color = this.preBoxes[i].color;
         }
+
+        this.preBoxesColorCycle = (this.preBoxesColorCycle + 1) % this.preBoxes.length;
+        this.preBoxes[this.preBoxes.length - 1].color = this.preBoxColors[this.preBoxesColorCycle];
 
         // sets last pre-box to another location depending on gamemode
         if (this.gamemode === 0 || (this.gamemode === 3 && this.mixedRandMode === 0)) {
@@ -297,10 +316,10 @@ class Scoreboard {
         } else {
             text(ctx, "Highscore:", GAME_PARAMS.SCOREBOARD_X, GUI_PARAMS.SCOREBOARD_TEXTSIZE * 3);
             text(ctx, RECORDS[this.gp.gamemode][this.gp.difficulty], GAME_PARAMS.SCOREBOARD_X, GUI_PARAMS.SCOREBOARD_TEXTSIZE * 4);
-            text(ctx, "Score:", PARAMS.WIDTH / 2  - 50, PARAMS.HEIGHT / 2  + 40);
-            text(ctx, this.gp.score, PARAMS.WIDTH / 2  - 50, PARAMS.HEIGHT / 2  + 60);
+            text(ctx, "Score:", PARAMS.WIDTH / 2 - 50, PARAMS.HEIGHT / 2 + 40);
+            text(ctx, this.gp.score, PARAMS.WIDTH / 2 - 50, PARAMS.HEIGHT / 2 + 60);
         }
-        
+
         text(ctx, "Time:", GAME_PARAMS.SCOREBOARD_X, GUI_PARAMS.SCOREBOARD_TEXTSIZE * 5);
 
         text(ctx, "Combo:", GAME_PARAMS.SCOREBOARD_X, PARAMS.HEIGHT - GUI_PARAMS.SCOREBOARD_TEXTSIZE * 2);
