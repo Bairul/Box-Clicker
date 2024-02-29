@@ -78,3 +78,13 @@ function hideElement(elementid) {
 function showElement(elementid) {
     document.getElementById(elementid).style.display = 'block';
 }
+
+class Color4 {
+    constructor(r, g, b, a) {
+        Object.assign(this, { r, g, b, a });
+    }
+
+    toString() {
+        return rgba(this.r, this.g, this.b, this.a);
+    }
+}

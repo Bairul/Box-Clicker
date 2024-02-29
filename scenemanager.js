@@ -7,6 +7,7 @@ class SceneManager {
         this.gamemode = "0";
         this.difficluty = "1";
         this.premoves = "1";
+        this.weight = "4";
         this.allowMouse = true;
         this.showLine = false;
         this.showFade = false;
@@ -30,12 +31,13 @@ class SceneManager {
             this.allowMouse = this.menu.getMouseClick();
             this.showLine = this.menu.getShowLines();
             this.showFade = this.menu.getShowFade();
+            this.weight = this.menu.getWeight();
         } else if (PARAMS.START) {
             this.menu.removeFromWorld = true;
             this.gameplay.removeFromWorld = false;
             if (!this.startGame) {
                 this.game.addEntity(this.gameplay);
-                this.gameplay.init(this.gridsize, this.gamemode, this.difficluty, this.premoves, this.allowMouse, this.showLine, this.showFade);
+                this.gameplay.init(this.gridsize, this.gamemode, this.difficluty, this.premoves, this.weight, this.allowMouse, this.showLine, this.showFade);
                 this.gameplay.reset();
                 noCursor();
                 if (this.firstTime) {

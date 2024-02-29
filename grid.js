@@ -9,13 +9,12 @@ class Box {
     }
 
     draw(ctx) {
-        stroke(ctx, this.color);
+        stroke(ctx, this.color.toString());
+        strokeWeight(ctx, this.weight);
         if (this.premove) {
-            strokeWeight(ctx, this.weight);
             rect(ctx, this.x, this.y, this.size, this.size);
         } else {
-            strokeWeight(ctx, 1);
-            rect(ctx, this.x, this.y, this.size, this.size, this.color);
+            rect(ctx, this.x, this.y, this.size, this.size, this.color.toString());
         }
     }
 }

@@ -17,12 +17,17 @@ class Menu {
         this.difficultySelect = document.getElementById("difficultySelect");
         this.gridSlider = document.getElementById("gridSlider");
         this.premoveSlider = document.getElementById("premoveSlider");
+        this.weightSlider = document.getElementById("weightSlider");
         this.linesCheckbox = document.getElementById("linesCheckbox");
         this.fadeCheckbox = document.getElementById("fadeCheckbox");
         this.mouseCheckbox = document.getElementById("mouseCheckbox");
 
         this.hideMenuOptions();
         this.menubuttons();
+    }
+
+    getWeight() {
+        return this.weightSlider.value;
     }
 
     getDifficulty() {
@@ -88,6 +93,7 @@ class Menu {
         hideElement("fadeCheckbox");
         hideElement("gamemodesTooltip");
         hideElement("difficultyTooltip");
+        hideElement("weightSlider");
     }
 
     showMenuOptions() {
@@ -101,6 +107,7 @@ class Menu {
         showElement("fadeCheckbox");
         showElement("gamemodesTooltip");
         showElement("difficultyTooltip");
+        showElement("weightSlider");
     }
 
     restart() {
@@ -143,6 +150,9 @@ class Menu {
         this.fadeCheckbox.style.left = vomMenuSlidX + 75 + "px";
         this.fadeCheckbox.style.top = vomMenuY + 77 + "px";
 
+        this.weightSlider.style.left = vomMenuSlidX + "px";
+        this.weightSlider.style.top = vomMenuY + 115 + "px";
+
         if (this.firstTime) {
             this.startButton.style.left = PARAMS.canvasPaddingX + PARAMS.WIDTH / 2 - 40 + "px";
             this.startButton.style.top = PARAMS.canvasPaddingY + PARAMS.HEIGHT / 2 - 15 / 2 + "px";
@@ -157,7 +167,6 @@ class Menu {
             const SP = 16;
             const offsetY = 32;
             const vertPad = 28;
-            const vertPadSlid = 60;
             const vomSlidX = MENU_PARAMS.X + MENU_PARAMS.SLIDER_LENGTH * 2;
             textSize(ctx, 12);
             fill(ctx, "black");
@@ -174,6 +183,7 @@ class Menu {
             text(ctx, "Premove: " + this.premoveSlider.value, vomSlidX, MENU_PARAMS.Y + offsetY);
             text(ctx, "Show Lines:", vomSlidX, MENU_PARAMS.Y + offsetY + vertPad);
             text(ctx, "Show Fade:", vomSlidX, MENU_PARAMS.Y + offsetY + vertPad * 2);
+            text(ctx, "Weight: " + this.weightSlider.value, vomSlidX, MENU_PARAMS.Y + offsetY + vertPad * 4);
         }
     }
 }

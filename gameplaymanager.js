@@ -38,19 +38,20 @@ class GameplayManager {
         this.grid = new Grid(game, 5);
 
         this.preBoxesColorCycle = 0;
-        this.preBoxColors = ["red", "blue", "lime", "yellow"];
-        this.currentBox = new Box(0, 0, this.boxSize, "black", 10);
+        this.preBoxColors = [new Color4(255, 0, 0, 1), new Color4(0, 0, 255, 1), new Color4(255, 87, 51, 1), new Color4(0, 255, 255, 1)];
+        this.currentBox = new Box(0, 0, this.boxSize, new Color4(0, 0, 0, 1), 1);
         this.preBoxes = [];
 
         this.reset();
         this.init(gridSize, gamemode, difficulty, premoves, mouse, lines, fade);
     }
 
-    init(gridSize, gamemode, difficulty, premoves, mouse, lines, fade) {
+    init(gridSize, gamemode, difficulty, premoves, weight, mouse, lines, fade) {
         this.grid.size = parseInt(gridSize);
         this.gamemode = parseInt(gamemode);
         this.difficulty = parseInt(difficulty);
         this.premoves = parseInt(premoves);
+        this.weight = parseInt(weight);
         this.allowMouse = mouse;
         this.showLines = lines;
         this.showFade = fade;
@@ -61,9 +62,9 @@ class GameplayManager {
         // sets preboxes
         this.preBoxes.length = 0;
         // there is at least 1 prebox
-        this.preBoxes.push(new Box(0, 0, this.boxSize, this.preBoxColors[0], 10, true));
+        this.preBoxes.push(new Box(0, 0, this.boxSize, this.preBoxColors[0], this.weight, true));
         for (let i = 1; i < this.premoves; i++) {
-            this.preBoxes.push(new Box(0, 0, this.boxSize, this.preBoxColors[i], 10, true));
+            this.preBoxes.push(new Box(0, 0, this.boxSize, this.preBoxColors[i], this.weight, true));
         }
         this.randAllBoxes();
 
@@ -272,9 +273,21 @@ class GameplayManager {
             this.preBoxes[i].draw(ctx);
         }
 
+        // draw cursor
         stroke(ctx, "red");
-        strokeWeight(ctx, 5);
+        strokeWeight(ctx, this.weight / 2);
         line(ctx, this.game.mouse.x, this.game.mouse.y, this.game.pmouse.x, this.game.pmouse.y);
+
+        if (this.showLines && this.preBoxes.length > 0) {
+            for (let i = this.preBoxes.length - 1; i > 0; i--) {
+                stroke(ctx, this.preBoxes[i].color.toString());
+                //stroke(red(this.preBoxes[i].c), green(this.preBoxes[i].c), blue(this.preBoxes[i].c), 255 / (showTransCheck.checked() ? (i + 1) : 1));
+                strokeWeight(ctx, this.weight);
+                line(ctx, this.preBoxes[i - 1].x + this.boxSize / 2, this.preBoxes[i - 1].y + this.boxSize / 2, this.preBoxes[i].x + this.boxSize / 2, this.preBoxes[i].y + this.boxSize / 2);
+            }
+            stroke(ctx, this.preBoxes[0].color.toString());
+            line(ctx, this.currentBox.x + this.boxSize / 2, this.currentBox.y + this.boxSize / 2, this.preBoxes[0].x + this.boxSize / 2, this.preBoxes[0].y + this.boxSize / 2);
+        }
     }
 }
 
