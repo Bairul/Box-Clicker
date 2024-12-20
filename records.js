@@ -177,9 +177,6 @@ document.getElementById("confirmImport").onclick = function () {
         } else {
             parseRecordsString(cryptogram); // when not using api call
         }
-        cryptogram = '';
-        hideModal();
-        openRecordMenu();
     }
 }
 
@@ -199,6 +196,10 @@ async function callKmacDec(name, data) {
         if (datajson.accept == 1) {
             console.log("accept");
             parseRecordsString(datajson.decipheredText);
+            cryptogram = reader.result;
+            openRecordMenu();
+            hideModal();
+
         } else {
             console.log("reject");
             importContent.style.display = "none";
