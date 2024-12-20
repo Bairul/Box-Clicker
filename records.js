@@ -1,3 +1,6 @@
+const USE_API_CALL = true;
+let cryptogram = '';
+
 // record tabs
 function openRecordMenu() {
     isInRecords = true;
@@ -95,8 +98,11 @@ document.getElementById("confirmExport").onclick = function () {
             name.classList.remove('error');
         }, 300);
     } else {
-        // downloadTextFile(name.value, convertRecordsToString()); // when not using api call
-        callKmacEnc(name.value, convertRecordsToString());
+        if (USE_API_CALL) {
+            callKmacEnc(name.value, convertRecordsToString());
+        } else {
+            downloadTextFile(name.value, convertRecordsToString()); // when not using api call
+        }
         hideModal();
     }
 }
@@ -134,7 +140,6 @@ async function callKmacEnc(name, data) {
 
 
 // ========= IMPORTING =========
-let cryptogram = '';
 
 function parseRecordsString(str) {
     const arr = str.split('-');
@@ -166,9 +171,15 @@ document.getElementById("confirmImport").onclick = function () {
             name.classList.remove('error');
         }, 300);
     } else if (!cryptogram == '') {
-        // parseRecordsString(cryptogram); // when not using api call
-        callKmacDec(name.value, cryptogram);
+        console.log(name.value, cryptogram);
+        if (USE_API_CALL) {
+            callKmacDec(name.value, cryptogram);
+        } else {
+            parseRecordsString(cryptogram); // when not using api call
+        }
         cryptogram = '';
+        hideModal();
+        openRecordMenu();
     }
 }
 
@@ -188,7 +199,6 @@ async function callKmacDec(name, data) {
         if (datajson.accept == 1) {
             console.log("accept");
             parseRecordsString(datajson.decipheredText);
-            hideModal();
         } else {
             console.log("reject");
             importContent.style.display = "none";
