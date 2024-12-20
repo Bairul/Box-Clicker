@@ -163,6 +163,7 @@ function importRecords() {
 
 document.getElementById("confirmImport").onclick = function () {
     const name = document.getElementById("importName");
+    console.log(name.value, cryptogram);
     if (name.value == '') {
         // add shaking
         name.classList.add('error');
@@ -170,8 +171,7 @@ document.getElementById("confirmImport").onclick = function () {
         setTimeout(function () {
             name.classList.remove('error');
         }, 300);
-    } else if (!cryptogram == '') {
-        console.log(name.value, cryptogram);
+    } else if (cryptogram != '') {
         if (USE_API_CALL) {
             callKmacDec(name.value, cryptogram);
         } else {
@@ -196,10 +196,9 @@ async function callKmacDec(name, data) {
         if (datajson.accept == 1) {
             console.log("accept");
             parseRecordsString(datajson.decipheredText);
-            cryptogram = reader.result;
-            openRecordMenu();
+            cryptogram = '';
             hideModal();
-
+            openRecordMenu();
         } else {
             console.log("reject");
             importContent.style.display = "none";
