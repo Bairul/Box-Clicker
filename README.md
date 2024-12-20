@@ -1,6 +1,8 @@
 # Box Clicker
 #### a game where you click boxes
 
+Game is on [github pages](https://bairul.github.io/Box-Clicker/)
+
 ## Instructions
 1. Press **Start** to begin
 
